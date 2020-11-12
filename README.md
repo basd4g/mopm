@@ -39,9 +39,9 @@ There are the format of a line with key and value: '#mopm {key}: {value}'
 | url | the package's project url | `^http(s)?://.+$` |
 | description | the package's description | `^.*$` |
 | architecture | target architecture | `^amd64$` |
-| platform | target platform | `^(ubuntu|darwin)$` |
+| platform | target platform | `^(ubuntu\|darwin)$` |
 | dependencies | dependencies' package name to install the package | `^([a-z0-9\-]+(, [a-z0-9\-]+)*)?$` |
-| privilege | to need root privilege or not or never | `^(root|unnecessary|never)$` |
+| privilege | to need root privilege or not or never | `^(root\|unnecessary\|never)$` |
 
 #### Install script
 
