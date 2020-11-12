@@ -8,7 +8,6 @@
 #mopm dependencies: curl, apt, apt-key, grep
 #mopm verification: "which yarn"
 #mopm privilege: root
-# privilege ... root, unnecessary, never
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 YARN_PACKAGE_URL='deb https://dl.yarnpkg.com/debian/ stable main'
 YARN_LIST='/etc/apt/sources.list.d/yarn.list'
