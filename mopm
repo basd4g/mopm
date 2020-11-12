@@ -1,0 +1,29 @@
+#!/bin/bash
+
+export MOPM_ROOT=$(cd "$(dirname "$0")" ; pwd)
+
+# platform
+if [ $(uname) = 'darwin' ]; then
+  export MOPM_PLATFORM=darwin
+elif [ $(uname) = 'Linux' ] && [ -f /etc/os-release ] && grep -e '^NAME="Ubuntu"$' /etc/os-release > /dev/null 2>&1 ; then
+  export MOPM_PLATFORM=ubuntu
+else
+  echo "The machine is unsupport platform" 1>&2
+  exit 1;
+fi
+
+# architecture
+if [ $(uname -m) = 'x86_64' ]; then
+  export MOPM_ARCHITECTURE=amd64
+else
+  echo "The machine is unsupport architecture" 1>&2
+  exit 1;
+fi
+
+if [ "$1" = "" ]; then
+  echo "Please read README.md" 1>&2
+elif [ -f "$MOPM_ROOT/bin/$1" ]; then
+  bash "$MOPM_ROOT/bin/$1" "$2"
+else
+  echo "The subcommand did not exist" 1>&2
+fi

@@ -1,0 +1,2 @@
+#!/bin/bash
+ls "$MOPM_ROOT/definitions" -1 | grep -e "^$MOPM_ARCHITECTURE-$MOPM_PLATFORM-.*\.mopm" | cut -d '-' -f3- | sed 's/\.mopm$//'
