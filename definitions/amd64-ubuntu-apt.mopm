@@ -1,0 +1,10 @@
+#!/bin/bash -e
+# This is mopm package definition file. Please excute on mopm.
+#mopm name: apt
+#mopm url: https://wiki.debian.org/Apt
+#mopm description: Advanced Package Tool (or APT), the main command-line package manager for Debian and its derivatives.
+#mopm architecture: x86_64
+#mopm platform: ubuntu
+#mopm dependencies: 
+#mopm verification: which apt
+#mopm privilege: root

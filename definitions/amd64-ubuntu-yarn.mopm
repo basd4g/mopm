@@ -1,0 +1,19 @@
+#!/bin/bash -e
+# This is mopm package definition file. Please excute on mopm.
+#mopm name: yarn
+#mopm url: https://classic.yarnpkg.com
+#mopm description: Fast, reliable, and secure dependency management.
+#mopm architecture: x86_64
+#mopm platform: ubuntu
+#mopm dependencies: curl, apt, apt-key, grep
+#mopm verification: "which yarn"
+#mopm privilege: root
+# privilege ... root, unnecessary, never
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+YARN_PACKAGE_URL='deb https://dl.yarnpkg.com/debian/ stable main'
+YARN_LIST='/etc/apt/sources.list.d/yarn.list'
+if ! grep -q "$YARN_PACKAGE_URL" "$YARN_LIST" ; then
+  echo "$YARN_PACKAGE_URL" >> "$YARN_LIST"
+fi
+apt update
+apt install -y yarn
