@@ -1,2 +1,6 @@
 #!/bin/bash
 ls "$MOPM_ROOT/definitions" -1 | grep -e "^$MOPM_ARCHITECTURE-$MOPM_PLATFORM-.*\.mopm" | cut -d '-' -f3- | sed 's/\.mopm$//'
+
+find "$MOPM_ROOT/definitions" -type f | while read def_file; do
+  grep "$def_file"
+done

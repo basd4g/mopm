@@ -1,0 +1,49 @@
+#!/bin/bash
+
+path=$1
+failed_flag=false
+
+if ! [ "$(head -1 $path)" = '#!/bin/bash -e' ]; then
+  echo "lint error: line 1 must be '#!/bin/bash -e'" 1>&2
+  failed_flag=true
+fi
+if ! [ "$(head -2 $path | tail -1)" = '# This is mopm package definition file. Please excute on mopm.' ]; then
+  echo "lint error: line 2 must be '# This is mopm package definition file. Please excute on mopm.'" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm name: ' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm name: ' is not found" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm url: ' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm url: ' is not found" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm description: ' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm name: ' is not found" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm architecture: x86_64$' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm architecture: ' is not valid" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm platform: (ubuntu|darwin)$' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm platform: ' is not valid" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm dependencies: ([a-z0-9\-]+(, [a-z0-9\-]+)*)?$' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm name: ' is not valid" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm verification: ' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm verification: ' is not found" 1>&2
+  failed_flag=true
+fi
+if ! grep -E '^#mopm privilege: (root|unnecessary|never)$' $path > /dev/null 2>&1; then
+  echo "lint error: line '#mopm privilege: ' is not valid" 1>&2
+  failed_flag=true
+fi
+
+if [ "$failed_flag"=true ]; then
+  exit 1
+fi
