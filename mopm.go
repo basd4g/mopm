@@ -12,9 +12,15 @@ func main() {
     Name: "mopm",
     Usage: "Mopm (Manager Of Package Maganger) is meta package manager for cross platform environment.",
     Version: "0.0.1",
-    Action: func  (context *cli.Context) error {
-      fmt.Println("hello, world!")
-      return nil
+    Commands: []*cli.Command{
+      {
+        Name: "search",
+        Usage: "search package",
+        Action: func (c *cli.Context) error {
+          fmt.Printf("%s\n", c.Args().First())
+          return nil
+        },
+      },
     },
   }
 
