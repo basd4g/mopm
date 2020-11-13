@@ -35,12 +35,19 @@ func main() {
         Action: func (c *cli.Context) error {
           packageName := c.Args().First()
           packagePath := "definitions/" + packageName + ".mopm.yaml"
-          _, error := os.Stat(packagePath)
-          if error != nil {
-            log.Fatal("Error: The package did not exists")
-            return error
+          _, err := os.Stat(packagePath)
+          if err != nil {
+            log.Fatal(err)
+            return err
           }
-          readFile(packagePath)
+
+          pkg, err := readPackageFile(packagePath)
+          if err != nil {
+            log.Fatal(err)
+            return err
+          }
+
+          printPackage(pkg)
           return nil
         },
       },
@@ -53,27 +60,39 @@ func main() {
   }
 }
 
-func readFile (path string) {
+func readPackageFile(path string) (*Package, error) {
+  // file is exist?
+  _, err := os.Stat(path)
+  if err != nil {
+    log.Fatal("Error: The package do not exists")
+    return nil, err
+  }
+  // read file
   buf, err := ioutil.ReadFile(path)
   if err != nil {
     log.Fatal(err)
-    return
-  }
-
-  data, err := ReadOnStruct(buf)
-  if err != nil {
-    log.Fatal(err)
-    return
-  }
-  fmt.Println(*data)
-}
-
-func ReadOnStruct(fileBuffer []byte) (*Package, error) {
-  p := Package{}
-  err := yaml.Unmarshal(fileBuffer, &p)
-  if err != nil {
-    fmt.Println(err)
     return nil, err
   }
-  return &p, nil
+
+  pkg := Package{}
+  err = yaml.Unmarshal(buf, &pkg)
+  if err != nil {
+    log.Fatal(err)
+    return nil, err
+  }
+  return &pkg, nil
+}
+
+func printPackage(pkg *Package) {
+  fmt.Println("name:         " + pkg.Name)
+  fmt.Println("url:          " + pkg.Url)
+  fmt.Println("description:  " + pkg.Description)
+  fmt.Print("environments: ")
+  for i, env := range pkg.Environments {
+    if i != 0 {
+      fmt.Print(", ")
+    }
+    fmt.Print( "(" + env.Architecture + ", " + env.Platform + ")" )
+  }
+  fmt.Println()
 }
