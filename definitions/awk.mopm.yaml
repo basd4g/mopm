@@ -1,0 +1,18 @@
+#!/bin/mopm
+name: awk
+url: https://packages.ubuntu.com/xenial/gawk
+description: GNU awk, a pattern scanning and processing language
+- architecture: x86_64
+  platform: darwin
+  dependencies: brew
+  verification: "which gawk"
+  privilege: never
+  script: |
+    brew install -y gawk
+- architecture: x86_64
+  platform: ubuntu
+  dependencies: apt
+  verification: "which gawk"
+  privilege: root
+  script: |
+    apt install -y gawk

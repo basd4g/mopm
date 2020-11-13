@@ -1,0 +1,22 @@
+#!/bin/mopm
+name: peco
+url: https://github.com/peco/peco
+description: Simplistic interactive filtering tool
+- architecture: x86_64
+  platform: darwin
+  dependencies: brew
+  verification: "which peco"
+  privilege: never
+  script: |
+    brew install peco
+- architecture: x86_64
+  platform: ubuntu
+  dependencies: curl, awk, grep, tar, cp
+  verification: "which peco"
+  privilege: root
+  script: |
+    PECO_URL=$( curl -s https://api.github.com/repos/peco/peco/releases/latest \
+      | grep browser_download_url | awk -F '"' '{print $4}' | grep  peco_linux_amd64.tar.gz)
+    curl -fsSL "$PECO_URL" -o /tmp/peco_linux_amd64.tar.gz
+    tar -xzf /tmp/peco_linux_amd64.tar.gz -C /tmp
+    cp /tmp/peco_linux_amd64/peco /usr/local/bin
