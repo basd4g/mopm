@@ -6,7 +6,7 @@
 #mopm architecture: x86_64
 #mopm platform: ubuntu
 #mopm dependencies: curl, apt, apt-key, grep
-#mopm verification: "which yarn"
+#mopm verification: which yarn
 #mopm privilege: root
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 YARN_PACKAGE_URL='deb https://dl.yarnpkg.com/debian/ stable main'

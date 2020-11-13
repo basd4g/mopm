@@ -6,6 +6,6 @@
 #mopm architecture: x86_64
 #mopm platform: darwin
 #mopm dependencies: brew
-#mopm verification: "which yarn"
+#mopm verification: which yarn
 #mopm privilege: never
 brew install yarn
