@@ -1,0 +1,11 @@
+#!/bin/bash -e
+# This is mopm package definition file. Please excute on mopm.
+#mopm name: sample
+#mopm url: https://github.com/basd4g/mopm
+#mopm description: This is sample package definition script. It cannot be installed.
+#mopm architecture: x86_64
+#mopm platform: darwin
+#mopm dependencies: 
+#mopm verification: false
+#mopm privilege: never
+echo "This is sample install script. It is no excution anyware."
