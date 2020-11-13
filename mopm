@@ -20,6 +20,14 @@ else
   exit 1;
 fi
 
+# privilege
+if [ "$(whoami)" = "root" ]; then
+  export MOPM_PRIVILEGE=root
+else
+  export MOPM_PRIVILEGE=unroot
+fi
+
+
 if [ "$1" = "" ]; then
   echo "Please read README.md" 1>&2
 elif [ -f "$MOPM_ROOT/bin/$1" ]; then
