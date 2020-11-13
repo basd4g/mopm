@@ -2,17 +2,20 @@
 name: curl
 url: https://curl.se
 description: command line tool and library for transferring data with URLs
-- architecture: x86_64
-  platform: darwin
-  dependencies: brew
-  verification: "which curl"
-  privilege: never
-  script: |
-    brew install curl
-- architecture: x86_64
-  platform: ubuntu
-  dependencies: apt
-  verification: "which curl"
-  privilege: root
-  script: |
-    apt install -y curl
+environments:
+  - architecture: x86_64
+    platform: darwin
+    dependencies:
+      - brew
+    verification: "which curl"
+    privilege: never
+    script: |
+      brew install curl
+  - architecture: x86_64
+    platform: ubuntu
+    dependencies:
+     - apt
+    verification: "which curl"
+    privilege: root
+    script: |
+      apt install -y curl
