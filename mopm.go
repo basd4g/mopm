@@ -160,14 +160,14 @@ func printPackage(pkg *Package) {
 	fmt.Println("url:          " + pkg.Url)
 	fmt.Println("description:  " + pkg.Description)
 	fmt.Print("environments: ")
+	machineEnvId, err := machineEnvId()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	for i, env := range pkg.Environments {
 		if i != 0 {
 			fmt.Print(", ")
-		}
-		machineEnvId, err := machineEnvId()
-		if err != nil {
-			log.Fatal(err)
-			return
 		}
 		envId := env.Architecture + "@" + env.Platform
 		if machineEnvId == envId {
