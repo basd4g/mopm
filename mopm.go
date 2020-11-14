@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/go-yaml/yaml"
@@ -9,23 +10,26 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 )
 
+type Environment struct {
+	Architecture string
+	Platform     string
+	Dependencies []string
+	Verification string
+	Privilege    bool
+	Script       string
+}
+
 type Package struct {
 	Name         string
 	Url          string
 	Description  string
-	Environments []struct {
-		Architecture string
-		Platform     string
-		Dependencies []string
-		Verification string
-		Privilege    bool
-		Script       string
-	}
+	Environments []Environment
 }
 
 func main() {
@@ -39,19 +43,11 @@ func main() {
 				Usage: "search package",
 				Action: func(c *cli.Context) error {
 					packageName := c.Args().First()
-					packagePath := "definitions/" + packageName + ".mopm.yaml"
-					_, err := os.Stat(packagePath)
+					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
 					if err != nil {
 						log.Fatal(err)
 						return err
 					}
-
-					pkg, err := readPackageFile(packagePath)
-					if err != nil {
-						log.Fatal(err)
-						return err
-					}
-
 					printPackage(pkg)
 					return nil
 				},
@@ -71,8 +67,9 @@ func main() {
 				},
 			},
 			{
-				Name:  "environment",
-				Usage: "check the machine environment",
+				Name:    "environment",
+				Aliases: []string{"env"},
+				Usage:   "check the machine environment",
 				Action: func(c *cli.Context) error {
 					env, err := readEnvironment()
 					if err != nil {
@@ -80,6 +77,33 @@ func main() {
 						return err
 					}
 					fmt.Println(env)
+					return nil
+				},
+			},
+			{
+				Name:    "verify",
+				Aliases: []string{"vrf"},
+				Usage:   "verify the package to be installed or not",
+				Action: func(c *cli.Context) error {
+					packageName := c.Args().First()
+					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+					if err != nil {
+						log.Fatal(err)
+						return err
+					}
+					env, err := readPackageEnvironment(pkg)
+					if err != nil {
+						log.Fatal(err)
+						return err
+					}
+					cmd := exec.Command("bash")
+					cmd.Stdin = bytes.NewBufferString(env.Verification + "\n")
+					err = cmd.Run()
+					if err != nil {
+						err = errors.New("The package is not installed")
+						log.Fatal(err)
+						return err
+					}
 					return nil
 				},
 			},
@@ -113,6 +137,20 @@ func readPackageFile(path string) (*Package, error) {
 		return nil, err
 	}
 	return &pkg, nil
+}
+
+func readPackageEnvironment(pkg *Package) (*Environment, error) {
+	machineEnvId, err := readEnvironment()
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	for _, env := range pkg.Environments {
+		if env.Architecture+"@"+env.Platform == machineEnvId {
+			return &env, nil
+		}
+	}
+	return nil, errors.New("Matched environment do not exist")
 }
 
 func printPackage(pkg *Package) {
