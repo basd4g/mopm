@@ -124,7 +124,7 @@ func printPackage(pkg *Package) {
 		if i != 0 {
 			fmt.Print(", ")
 		}
-		fmt.Print("(" + env.Architecture + ", " + env.Platform + ")")
+		fmt.Print(env.Architecture + "@" + env.Platform)
 	}
 	fmt.Println()
 }
