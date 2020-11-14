@@ -1,3 +1,4 @@
+// vim:set noexpandtab :
 package main
 
 import (
