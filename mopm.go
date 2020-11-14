@@ -45,7 +45,7 @@ func main() {
 					packageName := c.Args().First()
 					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
 					if err != nil {
-						log.Fatal(err)
+						message(err.Error())
 						return err
 					}
 					printPackage(pkg)
@@ -59,7 +59,7 @@ func main() {
 					packagePath := c.Args().First()
 					_, err := readPackageFile(packagePath)
 					if err != nil {
-						log.Fatal(err)
+						message(err.Error())
 					}
 					return err
 				},
@@ -81,15 +81,10 @@ func main() {
 					packageName := c.Args().First()
 					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
 					if err != nil {
-						log.Fatal(err)
+						message(err.Error())
 						return err
 					}
-					err = verifyPackage(pkg)
-					if err != nil {
-						log.Fatal(err)
-						return err
-					}
-					return nil
+					return verifyPackage(pkg)
 				},
 			},
 			{
@@ -99,14 +94,18 @@ func main() {
 					packageName := c.Args().First()
 					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
 					if err != nil {
-						log.Fatal(err)
+						message(err.Error())
 						return err
 					}
 					err = installPackage(pkg)
 					if err != nil {
-						log.Fatal(err)
+						message(err.Error())
+						if err.Error() == "The package is already installed" {
+							return nil
+						}
 						return err
 					}
+					message("Installed successfully.")
 					return nil
 				},
 			},
@@ -122,25 +121,23 @@ func main() {
 func readPackageFile(path string) (*Package, error) {
 	_, err := os.Stat(path)
 	if err != nil {
-		log.Fatal("The package do not exists")
+		fmt.Errorf("The package do not exist: %s, Wrapped:%w", path, err)
 		return nil, err
 	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
 	pkg := Package{}
 	err = yaml.Unmarshal(buf, &pkg)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Errorf("Failed to parse yaml file: %s, Wrapped:%w", path, err)
 		return nil, err
 	}
 	err = lintPackage(&pkg)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	return &pkg, nil
@@ -153,7 +150,7 @@ func environmentOfTheMachine(pkg *Package) (*Environment, error) {
 			return &env, nil
 		}
 	}
-	return nil, errors.New("Matched environment do not exist")
+	return nil, errors.New("Matched environment does not exist")
 }
 
 func printPackage(pkg *Package) {
@@ -179,38 +176,38 @@ func printPackage(pkg *Package) {
 func lintPackage(pkg *Package) error {
 	pkgNameRegex := regexp.MustCompile(`^[0-9a-z\-]+$`)
 	if !pkgNameRegex.MatchString(pkg.Name) {
-		return errors.New("package name must consist of a-z, 0-9 and -(hyphen) charactors")
+		return errors.New("Package name must consist of a-z, 0-9 and -(hyphen) charactors")
 	}
 	urlRegex := regexp.MustCompile(`^https?://`)
 	if !urlRegex.MatchString(pkg.Url) {
-		return errors.New("package url must start with http(s):// ... ")
+		return errors.New("Package url must start with http(s):// ... ")
 	}
 	if pkg.Description == "" {
-		return errors.New("package url must not be empty")
+		return errors.New("Package url must not be empty")
 	}
 	if len(pkg.Environments) == 0 {
-		return errors.New("package environment must not be empty")
+		return errors.New("Package environment must not be empty")
 	}
 	for _, env := range pkg.Environments {
 		if env.Architecture != "amd64" {
-			return errors.New("package environment architecture must be 'amd64'")
+			return errors.New("Package environment architecture must be 'amd64'")
 		}
 		if env.Platform != "darwin" && env.Platform != "linux/ubuntu" {
-			return errors.New("package environment architecture must be 'darwin' || 'linux/ubuntu'")
+			return errors.New("Package environment architecture must be 'darwin' || 'linux/ubuntu'")
 		}
 		for _, dpkg := range env.Dependencies {
 			if !pkgNameRegex.MatchString(dpkg) {
-				return errors.New("package environment dependencies package name must consist of a-z, 0-9 and -(hyphen) charactors")
+				return errors.New("Package environment dependencies package name must consist of a-z, 0-9 and -(hyphen) charactors")
 			}
 		}
 		if env.Verification == "" {
-			return errors.New("package environment verification must not be empty")
+			return errors.New("Package environment verification must not be empty")
 		}
 		if env.Privilege != true && env.Privilege != false {
-			return errors.New("package environment architecture must be boolean")
+			return errors.New("Package environment architecture must be boolean")
 		}
 		if env.Script == "" {
-			return errors.New("package environment script must not be empty")
+			return errors.New("Package environment script must not be empty")
 		}
 	}
 	return nil
@@ -219,7 +216,6 @@ func lintPackage(pkg *Package) error {
 func verifyPackage(pkg *Package) error {
 	env, err := environmentOfTheMachine(pkg)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	err = execBash(env.Verification)
@@ -232,13 +228,11 @@ func verifyPackage(pkg *Package) error {
 func installPackage(pkg *Package) error {
 	env, err := environmentOfTheMachine(pkg)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	if verifyPackage(pkg) == nil {
-		fmt.Fprintln(os.Stderr, "The package is already installed")
-		return nil
+		return errors.New("The package is already installed")
 	}
 
 	// | package\user | root  | unroot |
@@ -257,14 +251,11 @@ func installPackage(pkg *Package) error {
 		err = errors.New("Check privilege to install this package")
 	}
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	if verifyPackage(pkg) != nil {
-		err = errors.New("Finished installing script but failed to verify")
-		log.Fatal(err)
-		return err
+		return errors.New("Finished installing script but failed to verify")
 	}
 	return nil
 }
@@ -301,4 +292,8 @@ func execBashUnsudo(script string) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
 	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
 	return cmd.Run()
+}
+
+func message(s string) {
+	fmt.Fprintln(os.Stderr, s)
 }
