@@ -8,7 +8,6 @@ import (
 	"github.com/go-yaml/yaml"
 	"github.com/urfave/cli"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -81,7 +80,7 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		os.Exit(1)
 	}
 }
 
@@ -99,6 +98,8 @@ func lint(packagePath string) error {
 	_, err := readPackageFile(packagePath)
 	if err != nil {
 		message(err.Error())
+	} else {
+		message("lint passed")
 	}
 	return err
 }
@@ -133,8 +134,7 @@ func install(packageName string) error {
 func readPackageFile(path string) (*Package, error) {
 	_, err := os.Stat(path)
 	if err != nil {
-		fmt.Errorf("The package do not exist: %s, Wrapped:%w", path, err)
-		return nil, err
+		return nil, fmt.Errorf("The package do not exist: %s\nWrapped: %w", path, err)
 	}
 
 	buf, err := ioutil.ReadFile(path)
@@ -145,8 +145,7 @@ func readPackageFile(path string) (*Package, error) {
 	pkg := Package{}
 	err = yaml.Unmarshal(buf, &pkg)
 	if err != nil {
-		fmt.Errorf("Failed to parse yaml file: %s, Wrapped:%w", path, err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to parse yaml file: %s\nWrapped: %w", path, err)
 	}
 	err = lintPackage(&pkg)
 	if err != nil {
@@ -165,11 +164,15 @@ func printPackage(pkg *Package) {
 		if i != 0 {
 			fmt.Print(", ")
 		}
+		needPrivilege := ""
+		if env.Privilege {
+			needPrivilege = "(need privilege)"
+		}
 		envId := env.Architecture + "@" + env.Platform
 		if machineEnvId == envId {
-			fmt.Print("\x1b[32m" + envId + "\x1b[0m")
+			fmt.Print("\x1b[32m" + envId + needPrivilege + "\x1b[0m")
 		} else {
-			fmt.Print(envId)
+			fmt.Print(envId + needPrivilege)
 		}
 	}
 	fmt.Println()
