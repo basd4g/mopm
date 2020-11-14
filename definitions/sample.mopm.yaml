@@ -3,14 +3,14 @@ name: sample
 url: https://github.com/basd4g/mopm
 description: This is sample package definition script. It cannot be installed.
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
     verification: "false && false"
     privilege: never
     script: |
       echo "This is sample install script. It is no excution anyware."
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
     verification: "false && false"

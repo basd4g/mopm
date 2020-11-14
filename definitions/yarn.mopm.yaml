@@ -3,7 +3,7 @@ name: yarn
 url: https://classic.yarnpkg.com
 description: Fast, reliable, and secure dependency management.
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
       - brew
@@ -11,7 +11,7 @@ environments:
     privilege: never
     script: |
       brew install yarn
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
       - curl

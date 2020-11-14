@@ -145,8 +145,8 @@ func checkPackageFormat(pkg *Package) error {
 		return errors.New("package environment must not be empty")
 	}
 	for _, env := range pkg.Environments {
-		if env.Architecture != "x86_64" {
-			return errors.New("package environment architecture must be 'x86_64'")
+		if env.Architecture != "amd64" {
+			return errors.New("package environment architecture must be 'amd64'")
 		}
 		if env.Platform != "darwin" && env.Platform != "ubuntu" {
 			return errors.New("package environment architecture must be 'darwin' || 'ubuntu'")

@@ -3,7 +3,7 @@ name: curl
 url: https://curl.se
 description: command line tool and library for transferring data with URLs
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
       - brew
@@ -11,7 +11,7 @@ environments:
     privilege: never
     script: |
       brew install curl
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
      - apt

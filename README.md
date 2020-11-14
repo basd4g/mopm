@@ -17,7 +17,7 @@ Mopm package definition file include all the information.
 | name | the package's name to specify the package | `^[a-z0-9\-]+$` |
 | url | the package's project url | `^http(s)?://.+$` |
 | description | the package's description | `^.*$` |
-| environments[].architecture | target architecture | `^x86_64$` |
+| environments[].architecture | target architecture | `^amd64$` |
 | environments[].platform | target platform | `^(ubuntu\|darwin)$` |
 | environments[].dependencies[] | dependencies' package name to install the package | `^[a-z0-9\-]+$` |
 | environments[].privilege | to need root privilege or not or never | `^(root\|unnecessary\|never)$` |
@@ -31,14 +31,14 @@ name: sample
 url: https://github.com/basd4g/mopm
 description: This is sample package definition script. It cannot be installed.
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
     verification: "false && false"
     privilege: never
     script: |
       echo "This is sample install script. It is no excution anyware."
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
     verification: "false && false"

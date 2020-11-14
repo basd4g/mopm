@@ -3,7 +3,7 @@ name: awk
 url: https://packages.ubuntu.com/xenial/gawk
 description: GNU awk, a pattern scanning and processing language
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
       - brew
@@ -11,7 +11,7 @@ environments:
     privilege: never
     script: |
       brew install -y gawk
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
       - apt

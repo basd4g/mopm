@@ -3,7 +3,7 @@ name: peco
 url: https://github.com/peco/peco
 description: Simplistic interactive filtering tool
 environments:
-  - architecture: x86_64
+  - architecture: amd64
     platform: darwin
     dependencies:
       - brew
@@ -11,7 +11,7 @@ environments:
     privilege: never
     script: |
       brew install peco
-  - architecture: x86_64
+  - architecture: amd64
     platform: ubuntu
     dependencies:
       - curl
