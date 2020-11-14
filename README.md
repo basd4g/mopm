@@ -8,84 +8,41 @@ It helps you to write dotfiles.
 
 ## Mopm package definition file
 
-Mopm package definition file is a bash shell script with specified comments. and it includes these infomation.
+a package is structed by a yaml file.
 
-- package name
-- installation script for a machine environment
-- dependencies to run installation script
-- to need root privilege or not to need root privilege
-
-A package is structed by some files.
-
-A definition file defines a package on a architecture and a platform.
-
-### Rules
-
-Mopm package definition file follow these rules
-
-#### Line 1 is shebang.
-
-`#!/bin/bash -e`
-
-#### Include all the information
-
-Include following these all information for mopm package.
-
-There are the format of a line with key and value: '#mopm {key}: {value}'
+Mopm package definition file include all the information.
 
 | key | value description | valid string (regex) |
 | --- | --- | --- |
 | name | the package's name to specify the package | `^[a-z0-9\-]+$` |
 | url | the package's project url | `^http(s)?://.+$` |
 | description | the package's description | `^.*$` |
-| architecture | target architecture | `^amd64$` |
-| platform | target platform | `^(ubuntu\|darwin)$` |
-| dependencies | dependencies' package name to install the package | `^([a-z0-9\-]+(, [a-z0-9\-]+)*)?$` |
-| privilege | to need root privilege or not or never | `^(root\|unnecessary\|never)$` |
-
-#### Install script
-
-Lines starting without # is installation bash script.
+| environments[].architecture | target architecture | `^x86_64$` |
+| environments[].platform | target platform | `^(ubuntu\|darwin)$` |
+| environments[].dependencies[] | dependencies' package name to install the package | `^[a-z0-9\-]+$` |
+| environments[].privilege | to need root privilege or not or never | `^(root\|unnecessary\|never)$` |
+| environments[].script | installation script for the environment | `^.*$` |
 
 ### Samples
 
-yarn for ubuntu on amd64 (means x86_64)
-
-```definitions/amd64-ubuntu-yarn.mopm
-#!/bin/bash -e
-# This is mopm package definition file. Please excute on mopm.
-#mopm name: yarn
-#mopm url: https://classic.yarnpkg.com
-#mopm description: Fast, reliable, and secure dependency management.
-#mopm architecture: amd64
-#mopm platform: ubuntu
-#mopm dependencies: curl, apt, apt-key, grep
-#mopm verification: which yarn
-#mopm privilege: root
-# privilege ... root, unnecessary, never
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-YARN_PACKAGE_URL='deb https://dl.yarnpkg.com/debian/ stable main'
-YARN_LIST='/etc/apt/sources.list.d/yarn.list'
-if ! grep -q "$YARN_PACKAGE_URL" "$YARN_LIST" ; then
-  echo "$YARN_PACKAGE_URL" >> "$YARN_LIST"
-fi
-apt update
-apt install -y yarn
+```definitions/sample.mopm.yaml
+#!/bin/mopm
+name: sample
+url: https://github.com/basd4g/mopm
+description: This is sample package definition script. It cannot be installed.
+environments:
+  - architecture: x86_64
+    platform: darwin
+    dependencies:
+    verification: "false && false"
+    privilege: never
+    script: |
+      echo "This is sample install script. It is no excution anyware."
+  - architecture: x86_64
+    platform: ubuntu
+    dependencies:
+    verification: "false && false"
+    privilege: root
+    script: |
+      echo "This is sample install script. It is no excution anyware."
 ```
-
-yarn for macOS on amd64 (means x86_64)
-
-```definitions/amd64-darwin-yarn.mopm
-#!/bin/bash -e
-# This is mopm package definition file. Please excute on mopm.
-#mopm name: yarn
-#mopm url: https://classic.yarnpkg.com
-#mopm description: Fast, reliable, and secure dependency management.
-#mopm architecture: amd64
-#mopm platform: darwin
-#mopm dependencies: brew
-#mopm verification: which yarn
-#mopm privilege: never
-brew install yarn
-```
-
