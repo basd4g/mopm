@@ -69,8 +69,7 @@ func main() {
 				Aliases: []string{"env"},
 				Usage:   "check the machine environment",
 				Action: func(c *cli.Context) error {
-					env := machineEnvId()
-					fmt.Println(env)
+					fmt.Println(machineEnvId())
 					return nil
 				},
 			},
