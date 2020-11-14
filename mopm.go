@@ -73,13 +73,12 @@ func main() {
 				Name:  "environment",
 				Usage: "check the machine environment",
 				Action: func(c *cli.Context) error {
-					platform, err := readPlatform()
+					env, err := readEnvironment()
 					if err != nil {
 						log.Fatal(err)
 						return err
 					}
-					fmt.Println("platform:     " + platform)
-					fmt.Println("architecture: " + runtime.GOARCH)
+					fmt.Println(env)
 					return nil
 				},
 			},
@@ -186,4 +185,13 @@ func readPlatform() (string, error) {
 		}
 	}
 	return "linux", nil
+}
+
+func readEnvironment() (string, error) {
+	platform, err := readPlatform()
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+	return runtime.GOARCH + "@" + platform, nil
 }
