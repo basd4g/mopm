@@ -9,6 +9,8 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"runtime"
+	"strings"
 )
 
 type Package struct {
@@ -65,6 +67,20 @@ func main() {
 					}
 					err = checkPackageFormat(pkg)
 					return err
+				},
+			},
+			{
+				Name:  "environment",
+				Usage: "check the machine environment",
+				Action: func(c *cli.Context) error {
+					platform, err := readPlatform()
+					if err != nil {
+						log.Fatal(err)
+						return err
+					}
+					fmt.Println("platform:     " + platform)
+					fmt.Println("architecture: " + runtime.GOARCH)
+					return nil
 				},
 			},
 		},
@@ -151,4 +167,23 @@ func checkPackageFormat(pkg *Package) error {
 		}
 	}
 	return nil
+}
+
+func readPlatform() (string, error) {
+	if runtime.GOOS != "linux" {
+		return runtime.GOOS, nil
+	}
+	// read file
+	buf, err := ioutil.ReadFile("/etc/os-release")
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+	for _, line := range regexp.MustCompile(`\r\n|\n\r|\n|\r`).Split(string(buf), -1) {
+		if strings.HasPrefix(line, "NAME=\"") && strings.HasSuffix(line, "\"") {
+			distributionName := strings.TrimSpace(strings.ToLower(line[6 : len(line)-1]))
+			return "linux/" + distributionName, nil
+		}
+	}
+	return "linux", nil
 }
