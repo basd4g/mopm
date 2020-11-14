@@ -92,6 +92,24 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:  "install",
+				Usage: "install the package",
+				Action: func(c *cli.Context) error {
+					packageName := c.Args().First()
+					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+					if err != nil {
+						log.Fatal(err)
+						return err
+					}
+					err = installPackage(pkg)
+					if err != nil {
+						log.Fatal(err)
+						return err
+					}
+					return nil
+				},
+			},
 		},
 	}
 
@@ -204,11 +222,47 @@ func verifyPackage(pkg *Package) error {
 		log.Fatal(err)
 		return err
 	}
-	cmd := exec.Command("bash")
-	cmd.Stdin = bytes.NewBufferString(env.Verification + "\n")
-	err = cmd.Run()
+	err = execBash(env.Verification)
 	if err != nil {
-		err = errors.New("The package is not installed")
+		return errors.New("The package is not installed")
+	}
+	return nil
+}
+
+func installPackage(pkg *Package) error {
+	env, err := environmentOfTheMachine(pkg)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	if verifyPackage(pkg) == nil {
+		fmt.Fprintln(os.Stderr, "The package is already installed")
+		return nil
+	}
+
+	// | package\user | root  | unroot |
+	// | ----         | ----  | ----   |
+	// | root         | OK    | FAIL   |
+	// | unroot       | OK(*) | OK     |
+	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
+	machinePrivilege := (os.Getuid() == 0)
+	isSudo := (machinePrivilege && os.Getenv("SUDO_USER") != "")
+
+	if env.Privilege == machinePrivilege {
+		err = execBash(env.Script)
+	} else if !env.Privilege && isSudo {
+		err = execBashUnsudo(env.Script)
+	} else {
+		err = errors.New("Check privilege to install this package")
+	}
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	if verifyPackage(pkg) != nil {
+		err = errors.New("Finished installing script but failed to verify")
 		log.Fatal(err)
 		return err
 	}
@@ -235,4 +289,16 @@ func machinePlatform() string {
 func machineEnvId() string {
 	platform := machinePlatform()
 	return runtime.GOARCH + "@" + platform
+}
+
+func execBash(script string) error {
+	cmd := exec.Command("bash")
+	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
+	return cmd.Run()
+}
+
+func execBashUnsudo(script string) error {
+	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
+	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
+	return cmd.Run()
 }
