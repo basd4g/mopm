@@ -42,26 +42,14 @@ func main() {
 				Name:  "search",
 				Usage: "search package",
 				Action: func(c *cli.Context) error {
-					packageName := c.Args().First()
-					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
-					if err != nil {
-						message(err.Error())
-						return err
-					}
-					printPackage(pkg)
-					return nil
+					return search(c.Args().First())
 				},
 			},
 			{
 				Name:  "lint",
 				Usage: "check package definition file format",
 				Action: func(c *cli.Context) error {
-					packagePath := c.Args().First()
-					_, err := readPackageFile(packagePath)
-					if err != nil {
-						message(err.Error())
-					}
-					return err
+					return lint(c.Args().First())
 				},
 			},
 			{
@@ -78,35 +66,14 @@ func main() {
 				Aliases: []string{"vrf"},
 				Usage:   "verify the package to be installed or not",
 				Action: func(c *cli.Context) error {
-					packageName := c.Args().First()
-					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
-					if err != nil {
-						message(err.Error())
-						return err
-					}
-					return verifyPackage(pkg)
+					return verify(c.Args().First())
 				},
 			},
 			{
 				Name:  "install",
 				Usage: "install the package",
 				Action: func(c *cli.Context) error {
-					packageName := c.Args().First()
-					pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
-					if err != nil {
-						message(err.Error())
-						return err
-					}
-					err = installPackage(pkg)
-					if err != nil {
-						message(err.Error())
-						if err.Error() == "The package is already installed" {
-							return nil
-						}
-						return err
-					}
-					message("Installed successfully.")
-					return nil
+					return install(c.Args().First())
 				},
 			},
 		},
@@ -116,6 +83,51 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func search(packageName string) error {
+	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	if err != nil {
+		message(err.Error())
+		return err
+	}
+	printPackage(pkg)
+	return nil
+}
+
+func lint(packagePath string) error {
+	_, err := readPackageFile(packagePath)
+	if err != nil {
+		message(err.Error())
+	}
+	return err
+}
+
+func verify(packageName string) error {
+	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	if err != nil {
+		message(err.Error())
+		return err
+	}
+	return verifyPackage(pkg)
+}
+
+func install(packageName string) error {
+	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	if err != nil {
+		message(err.Error())
+		return err
+	}
+	err = installPackage(pkg)
+	if err != nil {
+		message(err.Error())
+		if err.Error() == "The package is already installed" {
+			return nil
+		}
+		return err
+	}
+	message("Installed successfully.")
+	return nil
 }
 
 func readPackageFile(path string) (*Package, error) {
@@ -141,16 +153,6 @@ func readPackageFile(path string) (*Package, error) {
 		return nil, err
 	}
 	return &pkg, nil
-}
-
-func environmentOfTheMachine(pkg *Package) (*Environment, error) {
-	machineEnvId := machineEnvId()
-	for _, env := range pkg.Environments {
-		if env.Architecture+"@"+env.Platform == machineEnvId {
-			return &env, nil
-		}
-	}
-	return nil, errors.New("Matched environment does not exist")
 }
 
 func printPackage(pkg *Package) {
@@ -258,6 +260,16 @@ func installPackage(pkg *Package) error {
 		return errors.New("Finished installing script but failed to verify")
 	}
 	return nil
+}
+
+func environmentOfTheMachine(pkg *Package) (*Environment, error) {
+	machineEnvId := machineEnvId()
+	for _, env := range pkg.Environments {
+		if env.Architecture+"@"+env.Platform == machineEnvId {
+			return &env, nil
+		}
+	}
+	return nil, errors.New("Matched environment does not exist")
 }
 
 func machinePlatform() string {
