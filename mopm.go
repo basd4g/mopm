@@ -89,16 +89,8 @@ func main() {
 						log.Fatal(err)
 						return err
 					}
-					env, err := environmentOfTheMachine(pkg)
+					err = verifyPackage(pkg)
 					if err != nil {
-						log.Fatal(err)
-						return err
-					}
-					cmd := exec.Command("bash")
-					cmd.Stdin = bytes.NewBufferString(env.Verification + "\n")
-					err = cmd.Run()
-					if err != nil {
-						err = errors.New("The package is not installed")
 						log.Fatal(err)
 						return err
 					}
@@ -215,6 +207,23 @@ func lintPackage(pkg *Package) error {
 		if env.Script == "" {
 			return errors.New("package environment script must not be empty")
 		}
+	}
+	return nil
+}
+
+func verifyPackage(pkg *Package) error {
+	env, err := environmentOfTheMachine(pkg)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	cmd := exec.Command("bash")
+	cmd.Stdin = bytes.NewBufferString(env.Verification + "\n")
+	err = cmd.Run()
+	if err != nil {
+		err = errors.New("The package is not installed")
+		log.Fatal(err)
+		return err
 	}
 	return nil
 }
