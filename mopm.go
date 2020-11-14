@@ -69,7 +69,7 @@ func main() {
 				Aliases: []string{"env"},
 				Usage:   "check the machine environment",
 				Action: func(c *cli.Context) error {
-					env, err := readEnvironment()
+					env, err := machineEnvId()
 					if err != nil {
 						log.Fatal(err)
 						return err
@@ -89,7 +89,7 @@ func main() {
 						log.Fatal(err)
 						return err
 					}
-					env, err := readPackageEnvironment(pkg)
+					env, err := environmentOfTheMachine(pkg)
 					if err != nil {
 						log.Fatal(err)
 						return err
@@ -133,7 +133,7 @@ func readPackageFile(path string) (*Package, error) {
 		log.Fatal(err)
 		return nil, err
 	}
-	err = lintPackageFormat(&pkg)
+	err = lintPackage(&pkg)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -141,8 +141,8 @@ func readPackageFile(path string) (*Package, error) {
 	return &pkg, nil
 }
 
-func readPackageEnvironment(pkg *Package) (*Environment, error) {
-	machineEnvId, err := readEnvironment()
+func environmentOfTheMachine(pkg *Package) (*Environment, error) {
+	machineEnvId, err := machineEnvId()
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -164,7 +164,7 @@ func printPackage(pkg *Package) {
 		if i != 0 {
 			fmt.Print(", ")
 		}
-		machineEnvId, err := readEnvironment()
+		machineEnvId, err := machineEnvId()
 		if err != nil {
 			log.Fatal(err)
 			return
@@ -179,7 +179,7 @@ func printPackage(pkg *Package) {
 	fmt.Println()
 }
 
-func lintPackageFormat(pkg *Package) error {
+func lintPackage(pkg *Package) error {
 	pkgNameRegex := regexp.MustCompile(`^[0-9a-z\-]+$`)
 	if !pkgNameRegex.MatchString(pkg.Name) {
 		return errors.New("package name must consist of a-z, 0-9 and -(hyphen) charactors")
@@ -219,7 +219,7 @@ func lintPackageFormat(pkg *Package) error {
 	return nil
 }
 
-func readPlatform() (string, error) {
+func machinePlatform() (string, error) {
 	if runtime.GOOS != "linux" {
 		return runtime.GOOS, nil
 	}
@@ -238,8 +238,8 @@ func readPlatform() (string, error) {
 	return "linux", nil
 }
 
-func readEnvironment() (string, error) {
-	platform, err := readPlatform()
+func machineEnvId() (string, error) {
+	platform, err := machinePlatform()
 	if err != nil {
 		log.Fatal(err)
 		return "", err
