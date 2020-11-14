@@ -12,7 +12,7 @@ environments:
     script: |
       brew install peco
   - architecture: amd64
-    platform: ubuntu
+    platform: linux/ubuntu
     dependencies:
       - curl
       - awk

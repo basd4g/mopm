@@ -148,8 +148,8 @@ func checkPackageFormat(pkg *Package) error {
 		if env.Architecture != "amd64" {
 			return errors.New("package environment architecture must be 'amd64'")
 		}
-		if env.Platform != "darwin" && env.Platform != "ubuntu" {
-			return errors.New("package environment architecture must be 'darwin' || 'ubuntu'")
+		if env.Platform != "darwin" && env.Platform != "linux/ubuntu" {
+			return errors.New("package environment architecture must be 'darwin' || 'linux/ubuntu'")
 		}
 		for _, dpkg := range env.Dependencies {
 			if !pkgNameRegex.MatchString(dpkg) {

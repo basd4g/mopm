@@ -12,7 +12,7 @@ environments:
     script: |
       brew install curl
   - architecture: amd64
-    platform: ubuntu
+    platform: linux/ubuntu
     dependencies:
      - apt
     verification: "which curl"

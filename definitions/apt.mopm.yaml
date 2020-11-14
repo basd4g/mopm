@@ -4,7 +4,7 @@ url: https://wiki.debian.org/Apt
 description: Advanced Package Tool (or APT), the main command-line package manager for Debian and its derivatives.
 environments:
   - architecture: amd64
-    platform: ubuntu
+    platform: linux/ubuntu
     dependencies:
     verification: "which apt"
     privilege: root

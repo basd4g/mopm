@@ -18,7 +18,7 @@ Mopm package definition file include all the information.
 | url | the package's project url | `^http(s)?://.+$` |
 | description | the package's description | `^.*$` |
 | environments[].architecture | target architecture | `^amd64$` |
-| environments[].platform | target platform | `^(ubuntu\|darwin)$` |
+| environments[].platform | target platform | `^(linux/ubuntu\|darwin)$` |
 | environments[].dependencies[] | dependencies' package name to install the package | `^[a-z0-9\-]+$` |
 | environments[].privilege | to need root privilege or not or never | `^(root\|unnecessary\|never)$` |
 | environments[].script | installation script for the environment | `^.*$` |
@@ -39,7 +39,7 @@ environments:
     script: |
       echo "This is sample install script. It is no excution anyware."
   - architecture: amd64
-    platform: ubuntu
+    platform: linux/ubuntu
     dependencies:
     verification: "false && false"
     privilege: root

@@ -12,7 +12,7 @@ environments:
     script: |
       brew install -y gawk
   - architecture: amd64
-    platform: ubuntu
+    platform: linux/ubuntu
     dependencies:
       - apt
     verification: "which gawk"
