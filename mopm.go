@@ -69,11 +69,7 @@ func main() {
 				Aliases: []string{"env"},
 				Usage:   "check the machine environment",
 				Action: func(c *cli.Context) error {
-					env, err := machineEnvId()
-					if err != nil {
-						log.Fatal(err)
-						return err
-					}
+					env := machineEnvId()
 					fmt.Println(env)
 					return nil
 				},
@@ -134,11 +130,7 @@ func readPackageFile(path string) (*Package, error) {
 }
 
 func environmentOfTheMachine(pkg *Package) (*Environment, error) {
-	machineEnvId, err := machineEnvId()
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	machineEnvId := machineEnvId()
 	for _, env := range pkg.Environments {
 		if env.Architecture+"@"+env.Platform == machineEnvId {
 			return &env, nil
@@ -152,11 +144,7 @@ func printPackage(pkg *Package) {
 	fmt.Println("url:          " + pkg.Url)
 	fmt.Println("description:  " + pkg.Description)
 	fmt.Print("environments: ")
-	machineEnvId, err := machineEnvId()
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	machineEnvId := machineEnvId()
 	for i, env := range pkg.Environments {
 		if i != 0 {
 			fmt.Print(", ")
@@ -228,30 +216,24 @@ func verifyPackage(pkg *Package) error {
 	return nil
 }
 
-func machinePlatform() (string, error) {
+func machinePlatform() string {
 	if runtime.GOOS != "linux" {
-		return runtime.GOOS, nil
+		return runtime.GOOS
 	}
-	// read file
 	buf, err := ioutil.ReadFile("/etc/os-release")
 	if err != nil {
-		log.Fatal(err)
-		return "", err
+		panic("failed to read /etc/os-release inspite that your machine is linux")
 	}
 	for _, line := range regexp.MustCompile(`\r\n|\n\r|\n|\r`).Split(string(buf), -1) {
 		if strings.HasPrefix(line, "NAME=\"") && strings.HasSuffix(line, "\"") {
 			distributionName := strings.TrimSpace(strings.ToLower(line[6 : len(line)-1]))
-			return "linux/" + distributionName, nil
+			return "linux/" + distributionName
 		}
 	}
-	return "linux", nil
+	return "linux"
 }
 
-func machineEnvId() (string, error) {
-	platform, err := machinePlatform()
-	if err != nil {
-		log.Fatal(err)
-		return "", err
-	}
-	return runtime.GOARCH + "@" + platform, nil
+func machineEnvId() string {
+	platform := machinePlatform()
+	return runtime.GOARCH + "@" + platform
 }
