@@ -57,12 +57,10 @@ func main() {
 				Usage: "check package definition file format",
 				Action: func(c *cli.Context) error {
 					packagePath := c.Args().First()
-					pkg, err := readPackageFile(packagePath)
+					_, err := readPackageFile(packagePath)
 					if err != nil {
 						log.Fatal(err)
-						return err
 					}
-					err = checkPackageFormat(pkg)
 					return err
 				},
 			},
@@ -117,13 +115,12 @@ func main() {
 }
 
 func readPackageFile(path string) (*Package, error) {
-	// file is exist?
 	_, err := os.Stat(path)
 	if err != nil {
-		log.Fatal("Error: The package do not exists")
+		log.Fatal("The package do not exists")
 		return nil, err
 	}
-	// read file
+
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -132,6 +129,11 @@ func readPackageFile(path string) (*Package, error) {
 
 	pkg := Package{}
 	err = yaml.Unmarshal(buf, &pkg)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	err = lintPackageFormat(&pkg)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
@@ -177,7 +179,7 @@ func printPackage(pkg *Package) {
 	fmt.Println()
 }
 
-func checkPackageFormat(pkg *Package) error {
+func lintPackageFormat(pkg *Package) error {
 	pkgNameRegex := regexp.MustCompile(`^[0-9a-z\-]+$`)
 	if !pkgNameRegex.MatchString(pkg.Name) {
 		return errors.New("package name must consist of a-z, 0-9 and -(hyphen) charactors")
