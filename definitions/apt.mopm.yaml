@@ -7,6 +7,6 @@ environments:
     platform: linux/ubuntu
     dependencies:
     verification: "which apt"
-    privilege: root
+    privilege: true
     script: |
       which apt

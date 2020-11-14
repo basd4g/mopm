@@ -7,13 +7,13 @@ environments:
     platform: darwin
     dependencies:
     verification: "false && false"
-    privilege: never
+    privilege: false
     script: |
       echo "This is sample install script. It is no excution anyware."
   - architecture: amd64
     platform: linux/ubuntu
     dependencies:
     verification: "false && false"
-    privilege: root
+    privilege: true
     script: |
       echo "This is sample install script. It is no excution anyware."

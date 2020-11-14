@@ -8,7 +8,7 @@ environments:
     dependencies:
       - brew
     verification: "which peco"
-    privilege: never
+    privilege: false
     script: |
       brew install peco
   - architecture: amd64
@@ -20,7 +20,7 @@ environments:
       - tar
       - cp
     verification: "which peco"
-    privilege: root
+    privilege: true
     script: |
       PECO_URL=$( curl -s https://api.github.com/repos/peco/peco/releases/latest \
         | grep browser_download_url | awk -F '"' '{print $4}' | grep  peco_linux_amd64.tar.gz)

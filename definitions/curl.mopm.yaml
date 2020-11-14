@@ -8,7 +8,7 @@ environments:
     dependencies:
       - brew
     verification: "which curl"
-    privilege: never
+    privilege: false
     script: |
       brew install curl
   - architecture: amd64
@@ -16,6 +16,6 @@ environments:
     dependencies:
      - apt
     verification: "which curl"
-    privilege: root
+    privilege: true
     script: |
       apt install -y curl

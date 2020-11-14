@@ -8,7 +8,7 @@ environments:
     dependencies:
       - brew
     verification: "which yarn"
-    privilege: never
+    privilege: false
     script: |
       brew install yarn
   - architecture: amd64
@@ -19,7 +19,7 @@ environments:
       - apt-key
       - grep
     verification: "which yarn"
-    privilege: root
+    privilege: true
     script: |
       curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
       YARN_PACKAGE_URL='deb https://dl.yarnpkg.com/debian/ stable main'

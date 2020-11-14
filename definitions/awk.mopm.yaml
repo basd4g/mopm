@@ -8,7 +8,7 @@ environments:
     dependencies:
       - brew
     verification: "which gawk"
-    privilege: never
+    privilege: false
     script: |
       brew install -y gawk
   - architecture: amd64
@@ -16,6 +16,6 @@ environments:
     dependencies:
       - apt
     verification: "which gawk"
-    privilege: root
+    privilege: true
     script: |
       apt install -y gawk

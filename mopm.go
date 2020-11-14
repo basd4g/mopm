@@ -23,7 +23,7 @@ type Package struct {
 		Platform     string
 		Dependencies []string
 		Verification string
-		Privilege    string
+		Privilege    bool
 		Script       string
 	}
 }
@@ -124,7 +124,17 @@ func printPackage(pkg *Package) {
 		if i != 0 {
 			fmt.Print(", ")
 		}
-		fmt.Print(env.Architecture + "@" + env.Platform)
+		machineEnvId, err := readEnvironment()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		envId := env.Architecture + "@" + env.Platform
+		if machineEnvId == envId {
+			fmt.Print("\x1b[32m" + envId + "\x1b[0m")
+		} else {
+			fmt.Print(envId)
+		}
 	}
 	fmt.Println()
 }
@@ -159,8 +169,8 @@ func checkPackageFormat(pkg *Package) error {
 		if env.Verification == "" {
 			return errors.New("package environment verification must not be empty")
 		}
-		if env.Privilege != "root" && env.Privilege != "unnecessary" && env.Privilege != "never" {
-			return errors.New("package environment architecture must be 'root', 'unnecessary' or 'never'")
+		if env.Privilege != true && env.Privilege != false {
+			return errors.New("package environment architecture must be boolean")
 		}
 		if env.Script == "" {
 			return errors.New("package environment script must not be empty")
