@@ -294,13 +294,17 @@ func machineEnvId() string {
 	return runtime.GOARCH + "@" + platform
 }
 
-func execBash(script string) error {
+var execBash = execBashFunc
+
+func execBashFunc(script string) error {
 	cmd := exec.Command("bash")
 	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
 	return cmd.Run()
 }
 
-func execBashUnsudo(script string) error {
+var execBashUnsudo = execBashUnsudoFunc
+
+func execBashUnsudoFunc(script string) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
 	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
 	return cmd.Run()

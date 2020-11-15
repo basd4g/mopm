@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"testing"
 )
@@ -181,6 +182,38 @@ func TestEnvironmentOfTheMachine(t *testing.T) {
 	}
 }
 
+func TestVerifyPackage(t *testing.T) {
+	pkg.Environments[0].Verification = "true"
+	err := verifyPackage(&pkg)
+	if err != nil {
+		t.Errorf("verifyPackage() return error = %s, want nil", err)
+	}
+	pkg.Environments[0].Verification = "false & false"
+	err = verifyPackage(&pkg)
+	if err.Error() != "The package is not installed" {
+		t.Errorf("verifyPackage() return error = %s, want 'The package is not installed'", err)
+	}
+}
+
+var calledExecBashFunc = 0
+
+func fakeExecBashFunc(script string) error {
+	calledExecBashFunc += 1
+	if calledExecBashFunc >= 2 {
+		return nil
+	} else {
+		return errors.New("Error created with fakeExecBashFunc")
+	}
+}
+
+func TestInstallPackage(t *testing.T) {
+	execBash = fakeExecBashFunc
+	err := installPackage(&pkg)
+	if err != nil {
+		t.Errorf("installPackage() return error = %s, want nil", err)
+	}
+}
+
 /*
 TODO: Write tests for the following functions...
 
@@ -190,7 +223,6 @@ func lint(packagePath string) error {
 func verify(packageName string) error {
 func install(packageName string) error {
 func printPackage(pkg *Package) {
-func verifyPackage(pkg *Package) error {
 func installPackage(pkg *Package) error {
 func execBash(script string) error {
 func execBashUnsudo(script string) error {
