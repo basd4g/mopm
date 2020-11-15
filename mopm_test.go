@@ -168,6 +168,19 @@ func TestReadPackageFile(t *testing.T) {
 	}
 }
 
+func TestEnvironmentOfTheMachine(t *testing.T) {
+	got, err := environmentOfTheMachine(&pkg)
+	if err != nil {
+		t.Errorf("environmentOfTheMachine() return error = %s, want nil", err)
+	}
+	if got.Architecture != "amd64" {
+		t.Errorf("environmentOfTheMachine() return got.Architecture = %s, want 'amd64'", got.Architecture)
+	}
+	if got.Platform != "linux/ubuntu" {
+		t.Errorf("environmentOfTheMachine() return got.Architecture = %s, want 'linux/ubuntu'", got.Platform)
+	}
+}
+
 /*
 TODO: Write tests for the following functions...
 
@@ -179,7 +192,6 @@ func install(packageName string) error {
 func printPackage(pkg *Package) {
 func verifyPackage(pkg *Package) error {
 func installPackage(pkg *Package) error {
-func environmentOfTheMachine(pkg *Package) (*Environment, error) {
 func execBash(script string) error {
 func execBashUnsudo(script string) error {
 func message(s string) {
