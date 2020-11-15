@@ -20,7 +20,7 @@ Mopm package definition file include all the information.
 | environments[].architecture | target architecture | `^amd64$` |
 | environments[].platform | target platform | `^(linux/ubuntu\|darwin)$` |
 | environments[].dependencies[] | dependencies' package name to install the package | `^[a-z0-9\-]+$` |
-| environments[].privilege | boolean to need root privilege or not  | `^(true|false)$` |
+| environments[].privilege | boolean to need root privilege or not  | `^(true\|false)$` |
 | environments[].script | installation script for the environment | `^.*$` |
 
 ### Samples
