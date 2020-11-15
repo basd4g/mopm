@@ -11,6 +11,13 @@ func TestMachinePlatform(t *testing.T) {
 	}
 }
 
+func TestMachineEnvId(t *testing.T) {
+	got := machineEnvId()
+	if got != "amd64@linux/ubuntu" {
+		t.Errorf("machineEnvId() = %s, want amd64@linux/ubuntu", got)
+	}
+}
+
 func TestLintPackage(t *testing.T) {
 	pkg := Package{
 		Name:        "package-name",
@@ -120,7 +127,6 @@ func printPackage(pkg *Package) {
 func verifyPackage(pkg *Package) error {
 func installPackage(pkg *Package) error {
 func environmentOfTheMachine(pkg *Package) (*Environment, error) {
-func machineEnvId() string {
 func execBash(script string) error {
 func execBashUnsudo(script string) error {
 func message(s string) {
