@@ -5,6 +5,22 @@ import (
 	"testing"
 )
 
+var pkg = Package{
+	Name:        "package-name",
+	Url:         "https://example.com",
+	Description: "This sentence is package description!",
+	Environments: []Environment{
+		{
+			Architecture: "amd64",
+			Platform:     "linux/ubuntu",
+			Dependencies: []string{},
+			Verification: "verificationCommand",
+			Privilege:    false,
+			Script:       "installComannds",
+		},
+	},
+}
+
 func TestMachinePlatform(t *testing.T) {
 	got := machinePlatform()
 	if got != "linux/ubuntu" {
@@ -20,22 +36,6 @@ func TestMachineEnvId(t *testing.T) {
 }
 
 func TestLintPackage(t *testing.T) {
-	pkg := Package{
-		Name:        "package-name",
-		Url:         "https://example.com",
-		Description: "This sentence is package description!",
-		Environments: []Environment{
-			{
-				Architecture: "amd64",
-				Platform:     "linux/ubuntu",
-				Dependencies: []string{},
-				Verification: "verificationCommand",
-				Privilege:    false,
-				Script:       "installComannds",
-			},
-		},
-	}
-
 	// success
 	got := lintPackage(&pkg)
 	if got != nil {
@@ -117,54 +117,54 @@ func TestLintPackage(t *testing.T) {
 
 func TestReadPackageFile(t *testing.T) {
 	dir, _ := os.Getwd()
-	pkg, err := readPackageFile(dir + "/sample.mopm.yaml")
+	got, err := readPackageFile(dir + "/sample.mopm.yaml")
 	if err != nil {
 		t.Errorf("readPackageFile() return error: %s, want nil", err)
 	}
-	if pkg.Name != "sample" {
-		t.Errorf("readPackageFile() return pkg.Name = %s, want 'sample'", pkg.Name)
+	if got.Name != "sample" {
+		t.Errorf("readPackageFile() return got.Name = %s, want 'sample'", got.Name)
 	}
-	if pkg.Url != "https://github.com/basd4g/mopm" {
-		t.Errorf("readPackageFile() return pkg.Url = %s, want 'https://github.com/basd4g/mopm'", pkg.Url)
+	if got.Url != "https://github.com/basd4g/mopm" {
+		t.Errorf("readPackageFile() return got.Url = %s, want 'https://github.com/basd4g/mopm'", got.Url)
 	}
-	if pkg.Description != "This is sample package definition script. It cannot be installed." {
-		t.Errorf("readPackageFile() return pkg.Description = %s, want 'This is sample package definition script. It cannot be installed.'", pkg.Description)
+	if got.Description != "This is sample package definition script. It cannot be installed." {
+		t.Errorf("readPackageFile() return got.Description = %s, want 'This is sample package definition script. It cannot be installed.'", got.Description)
 	}
-	if pkg.Environments[0].Architecture != "amd64" {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Architecture = %s, wants 'amd64'", pkg.Environments[0].Architecture)
+	if got.Environments[0].Architecture != "amd64" {
+		t.Errorf("readPackageFile() return got.Environments[0].Architecture = %s, wants 'amd64'", got.Environments[0].Architecture)
 	}
-	if pkg.Environments[0].Platform != "darwin" {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Platform = %s, wants 'darwin'", pkg.Environments[0].Platform)
+	if got.Environments[0].Platform != "darwin" {
+		t.Errorf("readPackageFile() return got.Environments[0].Platform = %s, wants 'darwin'", got.Environments[0].Platform)
 	}
-	if pkg.Environments[0].Dependencies != nil {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Dependencies = %s, nil", pkg.Environments[0].Dependencies)
+	if got.Environments[0].Dependencies != nil {
+		t.Errorf("readPackageFile() return got.Environments[0].Dependencies = %s, nil", got.Environments[0].Dependencies)
 	}
-	if pkg.Environments[0].Verification != "false && false" {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Verification = %s, wants 'false && false'", pkg.Environments[0].Verification)
+	if got.Environments[0].Verification != "false && false" {
+		t.Errorf("readPackageFile() return got.Environments[0].Verification = %s, wants 'false && false'", got.Environments[0].Verification)
 	}
-	if pkg.Environments[0].Privilege != false {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Privilege = true, wants false")
+	if got.Environments[0].Privilege != false {
+		t.Errorf("readPackageFile() return got.Environments[0].Privilege = true, wants false")
 	}
-	if pkg.Environments[0].Script != "echo \"This is sample install script. It is no excution anyware.\"\n" {
-		t.Errorf("readPackageFile() return pkg.Environments[0].Script = %s, wants echo \"This is sample install script. It is no excution anyware.\"\n", pkg.Environments[0].Script)
+	if got.Environments[0].Script != "echo \"This is sample install script. It is no excution anyware.\"\n" {
+		t.Errorf("readPackageFile() return got.Environments[0].Script = %s, wants echo \"This is sample install script. It is no excution anyware.\"\n", got.Environments[0].Script)
 	}
-	if pkg.Environments[1].Architecture != "amd64" {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Architecture = %s, wants 'amd64'", pkg.Environments[1].Architecture)
+	if got.Environments[1].Architecture != "amd64" {
+		t.Errorf("readPackageFile() return got.Environments[1].Architecture = %s, wants 'amd64'", got.Environments[1].Architecture)
 	}
-	if pkg.Environments[1].Platform != "linux/ubuntu" {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Platform = %s, wants 'linux/ubuntu'", pkg.Environments[1].Platform)
+	if got.Environments[1].Platform != "linux/ubuntu" {
+		t.Errorf("readPackageFile() return got.Environments[1].Platform = %s, wants 'linux/ubuntu'", got.Environments[1].Platform)
 	}
-	if pkg.Environments[1].Dependencies != nil {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Dependencies = %s, nil", pkg.Environments[1].Dependencies)
+	if got.Environments[1].Dependencies != nil {
+		t.Errorf("readPackageFile() return got.Environments[1].Dependencies = %s, nil", got.Environments[1].Dependencies)
 	}
-	if pkg.Environments[1].Verification != "false && false" {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Verification = %s, wants 'false && false'", pkg.Environments[1].Verification)
+	if got.Environments[1].Verification != "false && false" {
+		t.Errorf("readPackageFile() return got.Environments[1].Verification = %s, wants 'false && false'", got.Environments[1].Verification)
 	}
-	if pkg.Environments[1].Privilege != true {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Privilege = false, wants true")
+	if got.Environments[1].Privilege != true {
+		t.Errorf("readPackageFile() return got.Environments[1].Privilege = false, wants true")
 	}
-	if pkg.Environments[1].Script != "echo \"This is sample install script. It is no excution anyware.\"\n" {
-		t.Errorf("readPackageFile() return pkg.Environments[1].Script = %s, wants echo \"This is sample install script. It is no excution anyware.\"\n", pkg.Environments[1].Script)
+	if got.Environments[1].Script != "echo \"This is sample install script. It is no excution anyware.\"\n" {
+		t.Errorf("readPackageFile() return got.Environments[1].Script = %s, wants echo \"This is sample install script. It is no excution anyware.\"\n", got.Environments[1].Script)
 	}
 }
 
