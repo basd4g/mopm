@@ -1,0 +1,19 @@
+#!/bin/mopm
+name: sample
+url: https://github.com/basd4g/mopm
+description: This is sample package definition script. It cannot be installed.
+environments:
+  - architecture: amd64
+    platform: darwin
+    dependencies:
+    verification: "false && false"
+    privilege: false
+    script: |
+      echo "This is sample install script. It is no excution anyware."
+  - architecture: amd64
+    platform: linux/ubuntu
+    dependencies:
+    verification: "false && false"
+    privilege: true
+    script: |
+      echo "This is sample install script. It is no excution anyware."
