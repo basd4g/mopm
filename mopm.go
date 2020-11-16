@@ -32,6 +32,11 @@ type Package struct {
 	Environments []Environment
 }
 
+type PackageFile struct {
+	Package *Package
+	Path    string
+}
+
 func (pkg Package) toString() string {
 	out := new(bytes.Buffer)
 	fmt.Fprintf(out, "name:         %s\n", pkg.Name)
@@ -46,6 +51,10 @@ func (pkg Package) toString() string {
 		fmt.Fprintf(out, env.toString())
 	}
 	return string(out.Bytes())
+}
+
+func (pkgFile PackageFile) toString() string {
+	return fmt.Sprintf("path:         %s\n%s", pkgFile.Path, pkgFile.Package.toString())
 }
 
 func (env Environment) toString() string {
@@ -116,12 +125,12 @@ func main() {
 }
 
 func search(packageName string) error {
-	pkg, err := findPackage(packageName)
+	pkgFile, err := findPackageFile(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
 	}
-	fmt.Println(pkg.toString())
+	fmt.Println(pkgFile.toString())
 	return nil
 }
 
@@ -208,20 +217,23 @@ func defsDirs() ([]string, error) {
 	return strings.Split(strings.TrimRight(string(buf), "\n"), "\n"), nil
 }
 
-func findPackage(packageName string) (*Package, error) {
+func findPackageFile(packageName string) (PackageFile, error) {
 	defsdirs, err := defsDirs()
 	if err != nil {
-		return nil, err
+		return PackageFile{}, err
 	}
 	var pkg *Package
 	for _, defsdir := range defsdirs {
 		path := defsdir + "/" + packageName + ".yaml"
 		pkg, err = readPackageFromFile(path)
 		if err == nil {
-			return pkg, nil
+			return PackageFile{
+				Package: pkg,
+				Path:    path,
+			}, nil
 		}
 	}
-	return nil, errors.New("The package does not exist")
+	return PackageFile{}, errors.New("The package does not exist")
 }
 
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
