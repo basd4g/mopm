@@ -32,6 +32,36 @@ type Package struct {
 	Environments []Environment
 }
 
+func (pkg Package) toString() string {
+	out := new(bytes.Buffer)
+	fmt.Fprintf(out, "name:         %s\n", pkg.Name)
+	fmt.Fprintf(out, "url:          %s\n", pkg.Url)
+	fmt.Fprintf(out, "description:  %s\n", pkg.Description)
+	fmt.Fprintf(out, "environments: ")
+
+	for i, env := range pkg.Environments {
+		if i != 0 {
+			fmt.Fprintf(out, ", ")
+		}
+		fmt.Fprintf(out, env.toString())
+	}
+	return string(out.Bytes())
+}
+
+func (env Environment) toString() string {
+	head := ""
+	tail := ""
+	if env.Privilege {
+		tail = "(need privilege)"
+	}
+	envId := env.Architecture + "@" + env.Platform
+	if machineEnvId() == envId {
+		head = "\x1b[32m"
+		tail += "\x1b[0m"
+	}
+	return head + envId + tail
+}
+
 func main() {
 	app := &cli.App{
 		Name:    "mopm",
@@ -91,7 +121,7 @@ func search(packageName string) error {
 		message(err.Error())
 		return err
 	}
-	printPackage(pkg)
+	fmt.Println(pkg.toString())
 	return nil
 }
 
@@ -234,30 +264,6 @@ func readPackageFile(path string) (*Package, error) {
 		return nil, err
 	}
 	return &pkg, nil
-}
-
-func printPackage(pkg *Package) {
-	fmt.Println("name:         " + pkg.Name)
-	fmt.Println("url:          " + pkg.Url)
-	fmt.Println("description:  " + pkg.Description)
-	fmt.Print("environments: ")
-	machineEnvId := machineEnvId()
-	for i, env := range pkg.Environments {
-		if i != 0 {
-			fmt.Print(", ")
-		}
-		needPrivilege := ""
-		if env.Privilege {
-			needPrivilege = "(need privilege)"
-		}
-		envId := env.Architecture + "@" + env.Platform
-		if machineEnvId == envId {
-			fmt.Print("\x1b[32m" + envId + needPrivilege + "\x1b[0m")
-		} else {
-			fmt.Print(envId + needPrivilege)
-		}
-	}
-	fmt.Println()
 }
 
 func lintPackage(pkg *Package) error {
