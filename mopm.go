@@ -86,7 +86,7 @@ func main() {
 }
 
 func search(packageName string) error {
-	pkg, err := readPackage(packageName)
+	pkg, err := findPackage(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
@@ -106,7 +106,7 @@ func lint(packagePath string) error {
 }
 
 func verify(packageName string) error {
-	env, err := readPackageEnvironment(packageName, machineEnvId())
+	env, err := findPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func verifyExec(env *Environment) error {
 }
 
 func install(packageName string) error {
-	env, err := readPackageEnvironment(packageName, machineEnvId())
+	env, err := findPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func defsDirs() ([]string, error) {
 	return strings.Split(strings.TrimRight(string(buf), "\n"), "\n"), nil
 }
 
-func readPackage(packageName string) (*Package, error) {
+func findPackage(packageName string) (*Package, error) {
 	defsdirs, err := defsDirs()
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func readPackage(packageName string) (*Package, error) {
 	return nil, errors.New("The package does not exist")
 }
 
-func readPackageEnvironment(packageName string, envId string) (*Environment, error) {
+func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
 	defsdirs, err := defsDirs()
 	if err != nil {
 		return nil, err
