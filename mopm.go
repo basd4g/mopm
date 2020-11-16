@@ -58,17 +58,15 @@ func (pkgFile PackageFile) toString() string {
 }
 
 func (env Environment) toString() string {
-	head := ""
-	tail := ""
+	priv := ""
 	if env.Privilege {
-		tail = "(need privilege)"
+		priv = "(need privilege)"
 	}
 	envId := env.Architecture + "@" + env.Platform
 	if machineEnvId() == envId {
-		head = "\x1b[32m"
-		tail += "\x1b[0m"
+		return "\x1b[32m" + envId + priv + "\x1b[0m"
 	}
-	return head + envId + tail
+	return envId + priv
 }
 
 func main() {
