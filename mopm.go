@@ -85,7 +85,7 @@ func main() {
 }
 
 func search(packageName string) error {
-	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	pkg, err := readPackage(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
@@ -105,7 +105,7 @@ func lint(packagePath string) error {
 }
 
 func verify(packageName string) error {
-	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	pkg, err := readPackage(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
@@ -114,7 +114,7 @@ func verify(packageName string) error {
 }
 
 func install(packageName string) error {
-	pkg, err := readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	pkg, err := readPackage(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
@@ -129,6 +129,10 @@ func install(packageName string) error {
 	}
 	message("Installed successfully.")
 	return nil
+}
+
+func readPackage(packageName string) (*Package, error) {
+	return readPackageFile("definitions/" + packageName + ".mopm.yaml")
 }
 
 func readPackageFile(path string) (*Package, error) {
