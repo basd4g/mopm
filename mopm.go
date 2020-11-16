@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"regexp"
 	"runtime"
 	"strings"
@@ -131,8 +132,23 @@ func install(packageName string) error {
 	return nil
 }
 
+func currentUser() (*user.User, error) {
+	if !machinePrivilege() {
+		return user.Current()
+	}
+	sudoUserName := os.Getenv("SUDO_USER")
+	if sudoUserName == "" {
+		return nil, errors.New("Please excute with sudo if you excute mopm by root")
+	}
+	return user.Lookup(sudoUserName)
+}
+
 func readPackage(packageName string) (*Package, error) {
-	return readPackageFile("definitions/" + packageName + ".mopm.yaml")
+	usr, err := currentUser()
+	if err != nil {
+		return nil, err
+	}
+	return readPackageFile(usr.HomeDir + "/.mopm/default/" + packageName + ".yaml")
 }
 
 func readPackageFile(path string) (*Package, error) {
@@ -246,10 +262,9 @@ func installPackage(pkg *Package) error {
 	// | root         | OK    | FAIL   |
 	// | unroot       | OK(*) | OK     |
 	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
-	machinePrivilege := (os.Getuid() == 0)
-	isSudo := (machinePrivilege && os.Getenv("SUDO_USER") != "")
+	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
 
-	if env.Privilege == machinePrivilege {
+	if env.Privilege == machinePrivilege() {
 		err = execBash(env.Script)
 	} else if !env.Privilege && isSudo {
 		err = execBashUnsudo(env.Script)
@@ -296,6 +311,10 @@ func machinePlatform() string {
 func machineEnvId() string {
 	platform := machinePlatform()
 	return runtime.GOARCH + "@" + platform
+}
+
+func machinePrivilege() bool {
+	return os.Getuid() == 0
 }
 
 var execBash = execBashFunc
