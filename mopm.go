@@ -126,7 +126,7 @@ func search(packageName string) error {
 }
 
 func lint(packagePath string) error {
-	_, err := readPackageFile(packagePath)
+	_, err := readPackageFromFile(packagePath)
 	if err != nil {
 		message(err.Error())
 	} else {
@@ -216,7 +216,7 @@ func findPackage(packageName string) (*Package, error) {
 	var pkg *Package
 	for _, defsdir := range defsdirs {
 		path := defsdir + "/" + packageName + ".yaml"
-		pkg, err = readPackageFile(path)
+		pkg, err = readPackageFromFile(path)
 		if err == nil {
 			return pkg, nil
 		}
@@ -232,7 +232,7 @@ func findPackageEnvironment(packageName string, envId string) (*Environment, err
 	var pkg *Package
 	for _, defsdir := range defsdirs {
 		path := defsdir + "/" + packageName + ".yaml"
-		pkg, err = readPackageFile(path)
+		pkg, err = readPackageFromFile(path)
 		if err != nil {
 			continue
 		}
@@ -245,7 +245,7 @@ func findPackageEnvironment(packageName string, envId string) (*Environment, err
 	return nil, errors.New("Matched environment does not exist")
 }
 
-func readPackageFile(path string) (*Package, error) {
+func readPackageFromFile(path string) (*Package, error) {
 	_, err := os.Stat(path)
 	if err != nil {
 		return nil, fmt.Errorf("The package do not exist: %s\nWrapped: %w", path, err)
