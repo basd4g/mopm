@@ -150,6 +150,7 @@ func lint(packagePath string) error {
 func verify(packageName string) error {
 	env, err := findPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
+		message(err.Error())
 		return err
 	}
 	return verifyExec(env)
@@ -241,18 +242,12 @@ func findAllPackageFile(packageName string) ([]PackageFile, error) {
 }
 
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
-	defsdirs, err := defsDirs()
+	pkgFiles, err := findAllPackageFile(packageName)
 	if err != nil {
 		return nil, err
 	}
-	var pkg *Package
-	for _, defsdir := range defsdirs {
-		path := defsdir + "/" + packageName + ".yaml"
-		pkg, err = readPackageFromFile(path)
-		if err != nil {
-			continue
-		}
-		for _, env := range pkg.Environments {
+	for _, pkgFile := range pkgFiles {
+		for _, env := range pkgFile.Package.Environments {
 			if env.Architecture+"@"+env.Platform == envId {
 				return &env, nil
 			}
