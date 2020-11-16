@@ -166,23 +166,48 @@ func currentUser() (*user.User, error) {
 	return user.Lookup(sudoUserName)
 }
 
-func readPackage(packageName string) (*Package, error) {
+func defsDirs() ([]string, error) {
 	usr, err := currentUser()
 	if err != nil {
 		return nil, err
 	}
-	return readPackageFile(usr.HomeDir + "/.mopm/default/" + packageName + ".yaml")
-}
-
-func readPackageEnvironment(packageName string, envId string) (*Environment, error) {
-	pkg, err := readPackage(packageName)
+	buf, err := ioutil.ReadFile(usr.HomeDir + "/.mopm-defs")
 	if err != nil {
 		return nil, err
 	}
-	machineEnvId := machineEnvId()
-	for _, env := range pkg.Environments {
-		if env.Architecture+"@"+env.Platform == machineEnvId {
-			return &env, nil
+	return strings.Split(strings.TrimRight(string(buf), "\n"), "\n"), nil
+}
+
+func readPackage(packageName string) (*Package, error) {
+	defsdirs, err := defsDirs()
+	if err != nil {
+		return nil, err
+	}
+	var pkg *Package
+	for _, defsdir := range defsdirs {
+		pkg, err = readPackageFile(defsdir + "/" + packageName + ".yaml")
+		if err == nil {
+			return pkg, nil
+		}
+	}
+	return nil, errors.New("The package does not exist")
+}
+
+func readPackageEnvironment(packageName string, envId string) (*Environment, error) {
+	defsdirs, err := defsDirs()
+	if err != nil {
+		return nil, err
+	}
+	var pkg *Package
+	for _, defsdir := range defsdirs {
+		pkg, err = readPackageFile(defsdir + "/" + packageName + ".yaml")
+		if err != nil {
+			continue
+		}
+		for _, env := range pkg.Environments {
+			if env.Architecture+"@"+env.Platform == envId {
+				return &env, nil
+			}
 		}
 	}
 	return nil, errors.New("Matched environment does not exist")
