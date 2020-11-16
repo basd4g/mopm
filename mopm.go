@@ -125,12 +125,15 @@ func main() {
 }
 
 func search(packageName string) error {
-	pkgFile, err := findPackageFile(packageName)
+	pkgFiles, err := findAllPackageFile(packageName)
 	if err != nil {
 		message(err.Error())
 		return err
 	}
-	fmt.Println(pkgFile.toString())
+	for _, pkgFile := range pkgFiles {
+		fmt.Println(pkgFile.toString())
+		fmt.Println()
+	}
 	return nil
 }
 
@@ -217,23 +220,24 @@ func defsDirs() ([]string, error) {
 	return strings.Split(strings.TrimRight(string(buf), "\n"), "\n"), nil
 }
 
-func findPackageFile(packageName string) (PackageFile, error) {
+func findAllPackageFile(packageName string) ([]PackageFile, error) {
 	defsdirs, err := defsDirs()
 	if err != nil {
-		return PackageFile{}, err
+		return []PackageFile{}, err
 	}
+	var pkgFiles []PackageFile
 	var pkg *Package
 	for _, defsdir := range defsdirs {
 		path := defsdir + "/" + packageName + ".yaml"
 		pkg, err = readPackageFromFile(path)
 		if err == nil {
-			return PackageFile{
+			pkgFiles = append(pkgFiles, PackageFile{
 				Package: pkg,
 				Path:    path,
-			}, nil
+			})
 		}
 	}
-	return PackageFile{}, errors.New("The package does not exist")
+	return pkgFiles, nil
 }
 
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
