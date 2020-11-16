@@ -215,7 +215,8 @@ func findPackage(packageName string) (*Package, error) {
 	}
 	var pkg *Package
 	for _, defsdir := range defsdirs {
-		pkg, err = readPackageFile(defsdir + "/" + packageName + ".yaml")
+		path := defsdir + "/" + packageName + ".yaml"
+		pkg, err = readPackageFile(path)
 		if err == nil {
 			return pkg, nil
 		}
@@ -230,7 +231,8 @@ func findPackageEnvironment(packageName string, envId string) (*Environment, err
 	}
 	var pkg *Package
 	for _, defsdir := range defsdirs {
-		pkg, err = readPackageFile(defsdir + "/" + packageName + ".yaml")
+		path := defsdir + "/" + packageName + ".yaml"
+		pkg, err = readPackageFile(path)
 		if err != nil {
 			continue
 		}
