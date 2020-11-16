@@ -138,7 +138,7 @@ func search(packageName string) error {
 }
 
 func lint(packagePath string) error {
-	_, err := readPackageFromFile(packagePath)
+	_, err := readPackageFile(packagePath)
 	if err != nil {
 		message(err.Error())
 	} else {
@@ -227,15 +227,12 @@ func findAllPackageFile(packageName string) ([]PackageFile, error) {
 		return []PackageFile{}, err
 	}
 	var pkgFiles []PackageFile
-	var pkg *Package
+	var pkgFile PackageFile
 	for _, defsdir := range defsdirs {
 		path := defsdir + "/" + packageName + ".yaml"
-		pkg, err = readPackageFromFile(path)
+		pkgFile, err = readPackageFile(path)
 		if err == nil {
-			pkgFiles = append(pkgFiles, PackageFile{
-				Package: pkg,
-				Path:    path,
-			})
+			pkgFiles = append(pkgFiles, pkgFile)
 		}
 	}
 	return pkgFiles, nil
@@ -256,27 +253,30 @@ func findPackageEnvironment(packageName string, envId string) (*Environment, err
 	return nil, errors.New("Matched environment does not exist")
 }
 
-func readPackageFromFile(path string) (*Package, error) {
+func readPackageFile(path string) (PackageFile, error) {
 	_, err := os.Stat(path)
 	if err != nil {
-		return nil, fmt.Errorf("The package do not exist: %s\nWrapped: %w", path, err)
+		return PackageFile{}, fmt.Errorf("The package do not exist: %s\nWrapped: %w", path, err)
 	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return PackageFile{}, err
 	}
 
 	pkg := Package{}
 	err = yaml.Unmarshal(buf, &pkg)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse yaml file: %s\nWrapped: %w", path, err)
+		return PackageFile{}, fmt.Errorf("Failed to parse yaml file: %s\nWrapped: %w", path, err)
 	}
 	err = lintPackage(&pkg)
 	if err != nil {
-		return nil, err
+		return PackageFile{}, err
 	}
-	return &pkg, nil
+	return PackageFile{
+		Package: &pkg,
+		Path:    path,
+	}, nil
 }
 
 func lintPackage(pkg *Package) error {
