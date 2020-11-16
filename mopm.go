@@ -106,27 +106,50 @@ func lint(packagePath string) error {
 }
 
 func verify(packageName string) error {
-	pkg, err := readPackage(packageName)
+	env, err := readPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
-		message(err.Error())
 		return err
 	}
-	return verifyPackage(pkg)
+	return verifyExec(env)
+}
+
+func verifyExec(env *Environment) error {
+	if execBash(env.Verification) != nil {
+		return errors.New("The package is not installed")
+	}
+	return nil
 }
 
 func install(packageName string) error {
-	pkg, err := readPackage(packageName)
+	env, err := readPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
-		message(err.Error())
 		return err
 	}
-	err = installPackage(pkg)
+	if verifyExec(env) == nil {
+		message("The package is already installed")
+		return nil
+	}
+
+	// | package\user | root  | unroot |
+	// | ----         | ----  | ----   |
+	// | root         | OK    | FAIL   |
+	// | unroot       | OK(*) | OK     |
+	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
+	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
+
+	if env.Privilege == machinePrivilege() {
+		err = execBash(env.Script)
+	} else if !env.Privilege && isSudo {
+		err = execBashUnsudo(env.Script)
+	} else {
+		err = errors.New("Check privilege to install this package")
+	}
+
 	if err != nil {
-		message(err.Error())
-		if err.Error() == "The package is already installed" {
-			return nil
-		}
 		return err
+	}
+	if verifyExec(env) != nil {
+		return errors.New("Finished installing script but failed to verify")
 	}
 	message("Installed successfully.")
 	return nil
@@ -149,6 +172,20 @@ func readPackage(packageName string) (*Package, error) {
 		return nil, err
 	}
 	return readPackageFile(usr.HomeDir + "/.mopm/default/" + packageName + ".yaml")
+}
+
+func readPackageEnvironment(packageName string, envId string) (*Environment, error) {
+	pkg, err := readPackage(packageName)
+	if err != nil {
+		return nil, err
+	}
+	machineEnvId := machineEnvId()
+	for _, env := range pkg.Environments {
+		if env.Architecture+"@"+env.Platform == machineEnvId {
+			return &env, nil
+		}
+	}
+	return nil, errors.New("Matched environment does not exist")
 }
 
 func readPackageFile(path string) (*Package, error) {
@@ -233,62 +270,6 @@ func lintPackage(pkg *Package) error {
 		}
 	}
 	return nil
-}
-
-func verifyPackage(pkg *Package) error {
-	env, err := environmentOfTheMachine(pkg)
-	if err != nil {
-		return err
-	}
-	err = execBash(env.Verification)
-	if err != nil {
-		return errors.New("The package is not installed")
-	}
-	return nil
-}
-
-func installPackage(pkg *Package) error {
-	env, err := environmentOfTheMachine(pkg)
-	if err != nil {
-		return err
-	}
-
-	if verifyPackage(pkg) == nil {
-		return errors.New("The package is already installed")
-	}
-
-	// | package\user | root  | unroot |
-	// | ----         | ----  | ----   |
-	// | root         | OK    | FAIL   |
-	// | unroot       | OK(*) | OK     |
-	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
-	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
-
-	if env.Privilege == machinePrivilege() {
-		err = execBash(env.Script)
-	} else if !env.Privilege && isSudo {
-		err = execBashUnsudo(env.Script)
-	} else {
-		err = errors.New("Check privilege to install this package")
-	}
-	if err != nil {
-		return err
-	}
-
-	if verifyPackage(pkg) != nil {
-		return errors.New("Finished installing script but failed to verify")
-	}
-	return nil
-}
-
-func environmentOfTheMachine(pkg *Package) (*Environment, error) {
-	machineEnvId := machineEnvId()
-	for _, env := range pkg.Environments {
-		if env.Architecture+"@"+env.Platform == machineEnvId {
-			return &env, nil
-		}
-	}
-	return nil, errors.New("Matched environment does not exist")
 }
 
 func machinePlatform() string {
