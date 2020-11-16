@@ -166,36 +166,41 @@ func verifyExec(env *Environment) error {
 func install(packageName string) error {
 	env, err := findPackageEnvironment(packageName, machineEnvId())
 	if err != nil {
+		message(err.Error())
 		return err
 	}
 	if verifyExec(env) == nil {
 		message("The package is already installed")
 		return nil
 	}
+	err = installExec(env.Privilege, env.Script)
+	if err != nil {
+		message(err.Error())
+		return err
+	}
+	if verifyExec(env) != nil {
+		err = errors.New("Finished installing script but failed to verify")
+		message(err.Error())
+		return err
+	}
+	message("Installed successfully.")
+	return nil
+}
 
+func installExec(privilege bool, script string) error {
 	// | package\user | root  | unroot |
 	// | ----         | ----  | ----   |
 	// | root         | OK    | FAIL   |
 	// | unroot       | OK(*) | OK     |
 	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
 	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
-
-	if env.Privilege == machinePrivilege() {
-		err = execBash(env.Script)
-	} else if !env.Privilege && isSudo {
-		err = execBashUnsudo(env.Script)
-	} else {
-		err = errors.New("Check privilege to install this package")
+	if privilege == machinePrivilege() {
+		return execBash(script)
 	}
-
-	if err != nil {
-		return err
+	if !privilege && isSudo {
+		return execBashUnsudo(script)
 	}
-	if verifyExec(env) != nil {
-		return errors.New("Finished installing script but failed to verify")
-	}
-	message("Installed successfully.")
-	return nil
+	return errors.New("Check privilege to install this package")
 }
 
 func currentUser() (*user.User, error) {
