@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-yaml/yaml"
 	"github.com/urfave/cli"
+	"gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -83,6 +84,13 @@ func main() {
 				},
 			},
 			{
+				Name:  "update",
+				Usage: "download latest package definition files",
+				Action: func(_ *cli.Context) error {
+					return update()
+				},
+			},
+			{
 				Name:  "lint",
 				Usage: "check package definition file format",
 				Action: func(c *cli.Context) error {
@@ -122,12 +130,43 @@ func main() {
 	}
 }
 
+func update() error {
+	for _, url := range packageRepositories() {
+		path := repoUrl2repoPath(packageRepositories()[0])
+		_, err := os.Stat(path)
+		if err != nil {
+			message("Directory does not exist: " + path + "\nClone")
+			gitClone(path, url)
+		} else {
+			gitPull(path)
+		}
+	}
+	return nil
+}
+
+func gitClone(path string, url string) {
+	_, err := git.PlainClone(path, false, &git.CloneOptions{
+		URL:      url,
+		Progress: os.Stderr,
+	})
+	checkIfError(err)
+}
+
+func gitPull(path string) {
+	r, err := git.PlainOpen(path)
+	checkIfError(err)
+	w, err := r.Worktree()
+	checkIfError(err)
+	err = w.Pull(&git.PullOptions{
+		RemoteName: "origin",
+		Progress:   os.Stderr,
+	})
+	checkIfError(err)
+}
+
 func search(packageName string) error {
 	pkgFiles, err := findAllPackageFile(packageName)
-	if err != nil {
-		message(err.Error())
-		return err
-	}
+	checkIfError(err)
 	for _, pkgFile := range pkgFiles {
 		fmt.Println(pkgFile.toString())
 		fmt.Println()
@@ -201,39 +240,55 @@ func installExec(privilege bool, script string) error {
 	return errors.New("Check privilege to install this package")
 }
 
-func currentUser() (*user.User, error) {
+func homeDir() string {
 	if !machinePrivilege() {
-		return user.Current()
+		usr, err := user.Current()
+		checkIfError(err)
+		return usr.HomeDir
 	}
 	sudoUserName := os.Getenv("SUDO_USER")
 	if sudoUserName == "" {
-		return nil, errors.New("Please excute with sudo if you excute mopm by root")
+		checkIfError(errors.New("Please excute with sudo if you excute mopm by root"))
 	}
-	return user.Lookup(sudoUserName)
+	usr, err := user.Lookup(sudoUserName)
+	checkIfError(err)
+	return usr.HomeDir
 }
 
-func defsDirs() ([]string, error) {
-	usr, err := currentUser()
-	if err != nil {
-		return nil, err
+func packageRepositories() []string {
+	defaultPackageRepoUrl := "https://github.com/basd4g/mopm-defs.git"
+
+	path := homeDir() + "/.mopm-repos"
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		message("Create the file because it does not exist: " + path)
+		err = ioutil.WriteFile(path, []byte(defaultPackageRepoUrl), 0644)
+		checkIfError(err)
 	}
-	buf, err := ioutil.ReadFile(usr.HomeDir + "/.mopm-defs")
-	if err != nil {
-		return nil, err
+	buf, err := ioutil.ReadFile(path)
+	checkIfError(err)
+
+	var repos []string
+	for _, repo := range strings.Split(string(buf), "\n") {
+		if repo != "" && !strings.HasPrefix(repo, "#") {
+			repos = append(repos, strings.Trim(repo, " "))
+		}
 	}
-	return strings.Split(strings.TrimRight(string(buf), "\n"), "\n"), nil
+	if len(repos) == 0 {
+		checkIfError(errors.New("package repository url is not found in the file: " + path))
+	}
+	return repos
+}
+
+func repoUrl2repoPath(url string) string {
+	repo := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "http://"), "https://"), ".git")
+	return homeDir() + "/.mopm/" + repo
 }
 
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
-	defsdirs, err := defsDirs()
-	if err != nil {
-		return []PackageFile{}, err
-	}
 	var pkgFiles []PackageFile
-	var pkgFile PackageFile
-	for _, defsdir := range defsdirs {
-		path := defsdir + "/" + packageName + ".yaml"
-		pkgFile, err = readPackageFile(path)
+	for _, url := range packageRepositories() {
+		path := repoUrl2repoPath(url) + "/definitions/" + packageName + ".yaml"
+		pkgFile, err := readPackageFile(path)
 		if err == nil {
 			pkgFiles = append(pkgFiles, pkgFile)
 		}
@@ -363,4 +418,11 @@ func execBashUnsudoFunc(script string) error {
 
 func message(s string) {
 	fmt.Fprintln(os.Stderr, s)
+}
+
+func checkIfError(err error) {
+	if err != nil {
+		message(err.Error())
+		os.Exit(1)
+	}
 }
