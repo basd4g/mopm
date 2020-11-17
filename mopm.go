@@ -230,10 +230,10 @@ func installExec(privilege bool, script string) error {
 	// | root         | OK    | FAIL   |
 	// | unroot       | OK(*) | OK     |
 	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
-	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
 	if privilege == machinePrivilege() {
 		return execBash(script)
 	}
+	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
 	if !privilege && isSudo {
 		return execBashUnsudo(script)
 	}
