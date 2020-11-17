@@ -75,7 +75,7 @@ func main() {
 		Name:    "mopm",
 		Usage:   "Mopm (Manager Of Package Maganger) is meta package manager for cross platform environment.",
 		Version: "0.0.1",
-		Commands: []*cli.Command{
+		Commands: []cli.Command{
 			{
 				Name:  "search",
 				Usage: "search package",
