@@ -167,3 +167,52 @@ func TestReadPackageFile(t *testing.T) {
 		t.Errorf("readPackageFile() return got.Package.Environments[1].Script = %s, wants echo \"This is sample install script. It is no excution anyware.\"\n", got.Package.Environments[1].Script)
 	}
 }
+
+func TestHomeDir(t *testing.T) {
+	got := homeDir()
+	if got != "/home/basd4g" {
+		t.Errorf("homeDir() = %s, want '/home/basd4g'", got)
+	}
+}
+
+func TestPackageRepositories(t *testing.T) {
+	got := packageRepositories()
+	if len(got) != 1 || got[0] != "https://github.com/basd4g/mopm-defs.git" {
+		t.Errorf("packageRepositories() = %s, want 'https://github.com/basd4g/mopm-defs.git'", got)
+	}
+}
+
+func TestRepoUrl2repoPath(t *testing.T) {
+	got := repoUrl2repoPath("https://github.com/basd4g/mopm-defs.git")
+	if got != "/home/basd4g/.mopm/github.com/basd4g/mopm-defs" {
+		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/basd4g/.mopm/github.com/basd4g/mopm-defs'", got)
+	}
+}
+
+/*
+func (pkg Package) String() string {
+func (pkgFile PackageFile) String() string {
+func (env Environment) String() string {
+func main() {
+func update() error {
+func gitClone(path string, url string) {
+func gitPull(path string) {
+func search(packageName string) error {
+func lint(packagePath string) error {
+func verify(packageName string) error {
+func verifyExec(env *Environment) error {
+func install(packageName string) error {
+func installExec(privilege bool, script string) error {
+func findAllPackageFile(packageName string) ([]PackageFile, error) {
+func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
+func readPackageFile(path string) (PackageFile, error) {
+func lintPackage(pkg *Package) error {
+func machinePlatform() string {
+func machineEnvId() string {
+func machinePrivilege() bool {
+:q
+func execBashFunc(script string) error {
+func execBashUnsudoFunc(script string) error {
+func message(s string) {
+func checkIfError(err error) {
+*/
