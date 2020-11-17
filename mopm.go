@@ -400,17 +400,13 @@ func machinePrivilege() bool {
 	return os.Getuid() == 0
 }
 
-var execBash = execBashFunc
-
-func execBashFunc(script string) error {
+func execBash(script string) error {
 	cmd := exec.Command("bash")
 	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
 	return cmd.Run()
 }
 
-var execBashUnsudo = execBashUnsudoFunc
-
-func execBashUnsudoFunc(script string) error {
+func execBashUnsudo(script string) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
 	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
 	return cmd.Run()
