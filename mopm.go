@@ -38,7 +38,7 @@ type PackageFile struct {
 	Path    string
 }
 
-func (pkg Package) toString() string {
+func (pkg Package) String() string {
 	out := new(bytes.Buffer)
 	fmt.Fprintf(out, "name:         %s\n", pkg.Name)
 	fmt.Fprintf(out, "url:          %s\n", pkg.Url)
@@ -49,16 +49,16 @@ func (pkg Package) toString() string {
 		if i != 0 {
 			fmt.Fprintf(out, ", ")
 		}
-		fmt.Fprintf(out, env.toString())
+		fmt.Fprintf(out, "%s", env)
 	}
 	return string(out.Bytes())
 }
 
-func (pkgFile PackageFile) toString() string {
-	return fmt.Sprintf("path:         %s\n%s", pkgFile.Path, pkgFile.Package.toString())
+func (pkgFile PackageFile) String() string {
+	return fmt.Sprintf("path:         %s\n%s", pkgFile.Path, pkgFile.Package)
 }
 
-func (env Environment) toString() string {
+func (env Environment) String() string {
 	priv := ""
 	if env.Privilege {
 		priv = "(need privilege)"
@@ -168,7 +168,7 @@ func search(packageName string) error {
 	pkgFiles, err := findAllPackageFile(packageName)
 	checkIfError(err)
 	for _, pkgFile := range pkgFiles {
-		fmt.Println(pkgFile.toString())
+		fmt.Println(pkgFile)
 		fmt.Println()
 	}
 	return nil
