@@ -23,15 +23,15 @@ var pkg = Package{
 
 func TestMachinePlatform(t *testing.T) {
 	got := machinePlatform()
-	if got != "linux/ubuntu" {
-		t.Errorf("machinePlatform() = %s, want 'linux/ubuntu'", got)
+	if got != "linux/ubuntu" && got != "darwin" {
+		t.Errorf("machinePlatform() = %s, want 'linux/ubuntu' or 'darwin'", got)
 	}
 }
 
 func TestMachineEnvId(t *testing.T) {
 	got := machineEnvId()
-	if got != "amd64@linux/ubuntu" {
-		t.Errorf("machineEnvId() = %s, want 'amd64@linux/ubuntu'", got)
+	if got != "amd64@linux/ubuntu" && got != "amd64@darwin" {
+		t.Errorf("machineEnvId() = %s, want 'amd64@linux/ubuntu' or 'amd64@darwin'", got)
 	}
 }
 
@@ -170,8 +170,8 @@ func TestReadPackageFile(t *testing.T) {
 
 func TestHomeDir(t *testing.T) {
 	got := homeDir()
-	if got != "/home/basd4g" {
-		t.Errorf("homeDir() = %s, want '/home/basd4g'", got)
+	if got != "/home/basd4g" && got !=  "/Users/basd4g" {
+		t.Errorf("homeDir() = %s, want '/home/basd4g' or '/Users/basd4g", got)
 	}
 }
 
@@ -184,8 +184,9 @@ func TestPackageRepositories(t *testing.T) {
 
 func TestRepoUrl2repoPath(t *testing.T) {
 	got := repoUrl2repoPath("https://github.com/basd4g/mopm-defs.git")
-	if got != "/home/basd4g/.mopm/github.com/basd4g/mopm-defs" {
-		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/basd4g/.mopm/github.com/basd4g/mopm-defs'", got)
+	if got != "/home/basd4g/.mopm/github.com/basd4g/mopm-defs" &&
+	   got != "/Users/basd4g/.mopm/github.com/basd4g/mopm-defs" {
+		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/basd4g/.mopm/github.com/basd4g/mopm-defs' or '/Users/basd4g/.mopm/github.com/basd4g/mopm-defs'", got)
 	}
 }
 
