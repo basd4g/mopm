@@ -32,6 +32,18 @@ func (env Environment) Verify() bool {
 	return execBash(env.Verification) == nil
 }
 
+func (env Environment) DependenciesNotInstalled() []string {
+	var ret []string
+	for _, depName := range env.Dependencies {
+		depEnv, err := findPackageEnvironment(depName, machineEnvId())
+		checkIfError(err)
+		if !depEnv.Verify() {
+			ret = append(ret, depName)
+		}
+	}
+	return ret
+}
+
 type Package struct {
 	Name         string
 	Url          string
@@ -133,6 +145,7 @@ func main() {
 
 func update(_ *cli.Context) {
 	for _, url := range packageRepositories() {
+		message(url)
 		path := repoUrl2repoPath(url)
 		_, err := os.Stat(path)
 		if err != nil {
@@ -161,7 +174,10 @@ func gitPull(path string) {
 		RemoteName: "origin",
 		Progress:   os.Stderr,
 	})
-	checkIfError(err)
+	if err != nil && err.Error() != "already up-to-date" {
+		checkIfError(err)
+	}
+	message("hello")
 }
 
 func search(c *cli.Context) {
@@ -194,21 +210,63 @@ func verify(c *cli.Context) {
 	fmt.Println(env.Verify())
 }
 
-func install(c *cli.Context) {
-	packageName := c.Args().First()
-	env, err := findPackageEnvironment(packageName, machineEnvId())
-	checkIfError(err)
+var installPkgStack []string
 
-	if env.Verify() {
-		message("The package is already installed")
-		return
+func PushInstallPkg(ss []string) {
+	installPkgStack = append(installPkgStack, ss...)
+}
+
+func PopInstallPkg() string {
+	ret := installPkgStack[len(installPkgStack)-1]
+	installPkgStack = installPkgStack[:len(installPkgStack)-1]
+	return ret
+}
+
+func FindInstallPkg(str string) bool {
+	for _, s := range installPkgStack {
+		if s == str {
+			return true
+		}
 	}
+	return false
+}
 
-	err = installExec(env.Privilege, env.Script)
-	checkIfError(err)
+func install(c *cli.Context) {
+	installedAny := false
+	pkgName := c.Args().First()
+	PushInstallPkg([]string{pkgName})
+	for len(installPkgStack) > 0 {
+		pkgName = PopInstallPkg()
+		if FindInstallPkg(pkgName) {
+			checkIfError(errors.New("dependencies is looped"))
+		}
 
-	if !env.Verify() {
-		checkIfError(errors.New("Finished installing script but failed to verify"))
+		env, err := findPackageEnvironment(pkgName, machineEnvId())
+		checkIfError(err)
+
+		if env.Verify() {
+			continue
+		}
+		installedAny = true
+
+		deps := env.DependenciesNotInstalled()
+		if len(deps) != 0 {
+			PushInstallPkg([]string{pkgName})
+			PushInstallPkg(deps)
+			continue
+		}
+
+		err = installExec(env.Privilege, env.Script)
+		checkIfError(err)
+
+		if !env.Verify() {
+			checkIfError(errors.New("Finished installing script but failed to verify"))
+		}
+		message("Installed " + pkgName)
+	}
+	if !installedAny {
+		message("The package is already installed.")
+		return
 	}
 	message("Installed successfully.")
 }
