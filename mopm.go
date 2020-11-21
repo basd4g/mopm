@@ -28,6 +28,10 @@ type Environment struct {
 	Script       string
 }
 
+func (env Environment) Verify() bool {
+	return execBash(env.Verification) == nil
+}
+
 type Package struct {
 	Name         string
 	Url          string
@@ -211,13 +215,7 @@ func verify(packageName string) error {
 		message(err.Error())
 		return err
 	}
-	return verifyExec(env)
-}
-
-func verifyExec(env *Environment) error {
-	if execBash(env.Verification) != nil {
-		return errors.New("The package is not installed")
-	}
+	fmt.Println(env.Verify())
 	return nil
 }
 
@@ -227,7 +225,7 @@ func install(packageName string) error {
 		message(err.Error())
 		return err
 	}
-	if verifyExec(env) == nil {
+	if env.Verify() {
 		message("The package is already installed")
 		return nil
 	}
@@ -236,7 +234,7 @@ func install(packageName string) error {
 		message(err.Error())
 		return err
 	}
-	if verifyExec(env) != nil {
+	if env.Verify() {
 		err = errors.New("Finished installing script but failed to verify")
 		message(err.Error())
 		return err
