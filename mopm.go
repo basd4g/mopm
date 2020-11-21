@@ -257,10 +257,20 @@ func homeDir() string {
 	return usr.HomeDir
 }
 
+func mopmDir() string {
+	mopmDir := homeDir() + "/.mopm"
+ if f, err := os.Stat(mopmDir); os.IsNotExist(err) || !f.IsDir() {
+	 // directory '~/.mopm' is not exist
+    err = os.Mkdir(mopmDir, 0777)
+		checkIfError(err)
+ }
+ return mopmDir
+}
+
 func packageRepositories() []string {
 	defaultPackageRepoUrl := "https://github.com/basd4g/mopm-defs.git"
 
-	path := homeDir() + "/.mopm-repos"
+	path := mopmDir() + "/repos-url"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		message("Create the file because it does not exist: " + path)
 		err = ioutil.WriteFile(path, []byte(defaultPackageRepoUrl), 0644)
@@ -283,7 +293,7 @@ func packageRepositories() []string {
 
 func repoUrl2repoPath(url string) string {
 	repo := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "http://"), "https://"), ".git")
-	return homeDir() + "/.mopm/repos/" + repo
+	return mopmDir() + "/repos/" + repo
 }
 
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
@@ -413,14 +423,15 @@ func execBashUnsudo(script string) error {
 }
 
 func cmdRun(cmd *exec.Cmd, stdinString string) error {
+	mopmDir := mopmDir()
 
 	cmd.Stdin = bytes.NewBufferString(stdinString)
-	logFile, err := os.OpenFile(homeDir() + "/.mopm/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(mopmDir + "/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	checkIfError(err)
 	fmt.Fprintf(logFile, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stdout = io.MultiWriter(os.Stdout, logFile)
 
-	logFileError, err := os.OpenFile(homeDir() + "/.mopm/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFileError, err := os.OpenFile(mopmDir + "/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	checkIfError(err)
 	fmt.Fprintf(logFileError, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stderr = io.MultiWriter(os.Stderr, logFileError)
