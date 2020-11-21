@@ -281,7 +281,7 @@ func packageRepositories() []string {
 
 func repoUrl2repoPath(url string) string {
 	repo := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "http://"), "https://"), ".git")
-	return homeDir() + "/.mopm/" + repo
+	return homeDir() + "/.mopm/repos/" + repo
 }
 
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
