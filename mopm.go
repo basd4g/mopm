@@ -146,7 +146,7 @@ func main() {
 
 func update() error {
 	for _, url := range packageRepositories() {
-		path := repoUrl2repoPath(packageRepositories()[0])
+		path := repoUrl2repoPath(url)
 		_, err := os.Stat(path)
 		if err != nil {
 			message("Directory does not exist: " + path + "\nClone")
