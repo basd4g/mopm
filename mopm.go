@@ -9,9 +9,11 @@ import (
 	"github.com/urfave/cli"
 	"gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"os/user"
+	"time"
 	"regexp"
 	"runtime"
 	"strings"
@@ -402,13 +404,26 @@ func machinePrivilege() bool {
 
 func execBash(script string) error {
 	cmd := exec.Command("bash")
-	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
-	return cmd.Run()
+	return cmdRun(cmd, "#!/bin/bash -e\n" + script + "\n")
 }
 
 func execBashUnsudo(script string) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
-	cmd.Stdin = bytes.NewBufferString("#!/bin/bash -e\n" + script + "\n")
+	return cmdRun(cmd, "#!/bin/bash -e\n" + script + "\n")
+}
+
+func cmdRun(cmd *exec.Cmd, stdinString string) error {
+
+	cmd.Stdin = bytes.NewBufferString(stdinString)
+	logFile, err := os.OpenFile(homeDir() + "/.mopm/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	checkIfError(err)
+	fmt.Fprintf(logFile, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
+	cmd.Stdout = io.MultiWriter(os.Stdout, logFile)
+
+	logFileError, err := os.OpenFile(homeDir() + "/.mopm/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	checkIfError(err)
+	fmt.Fprintf(logFileError, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
+	cmd.Stderr = io.MultiWriter(os.Stderr, logFileError)
 	return cmd.Run()
 }
 
