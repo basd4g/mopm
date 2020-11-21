@@ -8,15 +8,15 @@ import (
 	"github.com/go-yaml/yaml"
 	"github.com/urfave/cli"
 	"gopkg.in/src-d/go-git.v4"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
-	"time"
 	"regexp"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Environment struct {
@@ -53,9 +53,9 @@ func (pkg Package) String() string {
 
 	for i, env := range pkg.Environments {
 		if i != 0 {
-			fmt.Fprintf(out, ", ")
+			fmt.Fprint(out, ", ")
 		}
-		fmt.Fprintf(out, "%s", env)
+		fmt.Fprint(out, env)
 	}
 	return string(out.Bytes())
 }
@@ -276,12 +276,12 @@ func homeDir() string {
 
 func mopmDir() string {
 	mopmDir := homeDir() + "/.mopm"
- if f, err := os.Stat(mopmDir); os.IsNotExist(err) || !f.IsDir() {
-	 // directory '~/.mopm' is not exist
-    err = os.Mkdir(mopmDir, 0777)
+	if f, err := os.Stat(mopmDir); os.IsNotExist(err) || !f.IsDir() {
+		// directory '~/.mopm' is not exist
+		err = os.Mkdir(mopmDir, 0777)
 		checkIfError(err)
- }
- return mopmDir
+	}
+	return mopmDir
 }
 
 func packageRepositories() []string {
@@ -343,7 +343,7 @@ func findPackageEnvironment(packageName string, envId string) (*Environment, err
 func readPackageFile(path string) (PackageFile, error) {
 	_, err := os.Stat(path)
 	if err != nil {
-		return PackageFile{}, fmt.Errorf("The package do not exist: %s\nWrapped: %w", path, err)
+		return PackageFile{}, fmt.Errorf("The package does not exist: %s\nWrapped: %w", path, err)
 	}
 
 	buf, err := ioutil.ReadFile(path)
@@ -431,24 +431,24 @@ func machinePrivilege() bool {
 
 func execBash(script string) error {
 	cmd := exec.Command("bash")
-	return cmdRun(cmd, "#!/bin/bash -e\n" + script + "\n")
+	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n")
 }
 
 func execBashUnsudo(script string) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
-	return cmdRun(cmd, "#!/bin/bash -e\n" + script + "\n")
+	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n")
 }
 
 func cmdRun(cmd *exec.Cmd, stdinString string) error {
 	mopmDir := mopmDir()
 
 	cmd.Stdin = bytes.NewBufferString(stdinString)
-	logFile, err := os.OpenFile(mopmDir + "/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(mopmDir+"/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	checkIfError(err)
 	fmt.Fprintf(logFile, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stdout = io.MultiWriter(os.Stdout, logFile)
 
-	logFileError, err := os.OpenFile(mopmDir + "/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logFileError, err := os.OpenFile(mopmDir+"/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	checkIfError(err)
 	fmt.Fprintf(logFileError, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stderr = io.MultiWriter(os.Stderr, logFileError)
