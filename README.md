@@ -6,6 +6,19 @@ Mopm excute package installation commands based on mopm package definition file.
 Mopm also records installation date.
 It helps you to write dotfiles.
 
+## File description
+
+| path | description |
+| ---- | ---- |
+| `~/.mopm/` | the directory for mopm |
+| `~/.mopm/repos/` | package repository directory |
+| `~/.mopm/repos/github.com/basd4g/mopm-defs/definitions/sample.yaml` | definition (\*) |
+| `~/.mopm/repos-url` | package repository's url |
+| `~/.mopm/stdout.log` | log file |
+| `~/.mopm/stderr.log` | log file |
+
+(\*) sample package definition file of the default package repository
+
 ## Mopm package definition file
 
 a package is structed by a yaml file.
@@ -46,3 +59,9 @@ environments:
     script: |
       echo "This is sample install script. It is no excution anyware."
 ```
+
+## TODO
+
+- dependencies chain
+- container for testing package definition
+- check-privilege
