@@ -83,57 +83,44 @@ func main() {
 		Version: "0.0.1",
 		Commands: []cli.Command{
 			{
-				Name:  "search",
-				Usage: "search package",
-				Action: func(c *cli.Context) error {
-					return search(c.Args().First())
-				},
+				Name:   "search",
+				Usage:  "search package",
+				Action: search,
 			},
 			{
-				Name:  "check-privilege",
-				Usage: "check package to need privilege on this envirionment",
-				Action: func(c *cli.Context) error {
-					return checkPrivilege(c.Args().First())
-				},
+				Name:   "check-privilege",
+				Usage:  "check package to need privilege on this envirionment",
+				Action: checkPrivilege,
 			},
 
 			{
-				Name:  "update",
-				Usage: "download latest package definition files",
-				Action: func(_ *cli.Context) error {
-					return update()
-				},
+				Name:   "update",
+				Usage:  "download latest package definition files",
+				Action: update,
 			},
 			{
-				Name:  "lint",
-				Usage: "check package definition file format",
-				Action: func(c *cli.Context) error {
-					return lint(c.Args().First())
-				},
+				Name:   "lint",
+				Usage:  "check package definition file format",
+				Action: lint,
 			},
 			{
 				Name:    "environment",
 				Aliases: []string{"env"},
 				Usage:   "check the machine environment",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) {
 					fmt.Println(machineEnvId())
-					return nil
 				},
 			},
 			{
 				Name:    "verify",
 				Aliases: []string{"vrf"},
 				Usage:   "verify the package to be installed or not",
-				Action: func(c *cli.Context) error {
-					return verify(c.Args().First())
-				},
+				Action:  verify,
 			},
 			{
-				Name:  "install",
-				Usage: "install the package",
-				Action: func(c *cli.Context) error {
-					return install(c.Args().First())
-				},
+				Name:   "install",
+				Usage:  "install the package",
+				Action: install,
 			},
 		},
 	}
@@ -144,7 +131,7 @@ func main() {
 	}
 }
 
-func update() error {
+func update(_ *cli.Context) {
 	for _, url := range packageRepositories() {
 		path := repoUrl2repoPath(url)
 		_, err := os.Stat(path)
@@ -155,7 +142,6 @@ func update() error {
 			gitPull(path)
 		}
 	}
-	return nil
 }
 
 func gitClone(path string, url string) {
@@ -178,69 +164,53 @@ func gitPull(path string) {
 	checkIfError(err)
 }
 
-func search(packageName string) error {
+func search(c *cli.Context) {
+	packageName := c.Args().First()
 	pkgFiles, err := findAllPackageFile(packageName)
 	checkIfError(err)
 	for _, pkgFile := range pkgFiles {
-		fmt.Println(pkgFile)
-		fmt.Println()
+		fmt.Println(pkgFile, "\n")
 	}
-	return nil
 }
 
-func checkPrivilege(packageName string) error {
+func checkPrivilege(c *cli.Context) {
+	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
 	checkIfError(err)
-	if env.Privilege {
-		fmt.Println("true")
-	} else {
-		fmt.Println("false")
-	}
-	return nil
+	fmt.Println(env.Privilege)
 }
 
-func lint(packagePath string) error {
+func lint(c *cli.Context) {
+	packagePath := c.Args().First()
 	_, err := readPackageFile(packagePath)
-	if err != nil {
-		message(err.Error())
-	} else {
-		message("lint passed")
-	}
-	return err
+	checkIfError(err)
+	message("lint passed")
 }
 
-func verify(packageName string) error {
+func verify(c *cli.Context) {
+	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
-	if err != nil {
-		message(err.Error())
-		return err
-	}
+	checkIfError(err)
 	fmt.Println(env.Verify())
-	return nil
 }
 
-func install(packageName string) error {
+func install(c *cli.Context) {
+	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
-	if err != nil {
-		message(err.Error())
-		return err
-	}
+	checkIfError(err)
+
 	if env.Verify() {
 		message("The package is already installed")
-		return nil
+		return
 	}
+
 	err = installExec(env.Privilege, env.Script)
-	if err != nil {
-		message(err.Error())
-		return err
-	}
-	if env.Verify() {
-		err = errors.New("Finished installing script but failed to verify")
-		message(err.Error())
-		return err
+	checkIfError(err)
+
+	if !env.Verify() {
+		checkIfError(errors.New("Finished installing script but failed to verify"))
 	}
 	message("Installed successfully.")
-	return nil
 }
 
 func installExec(privilege bool, script string) error {
