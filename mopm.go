@@ -86,6 +86,14 @@ func main() {
 				},
 			},
 			{
+				Name:  "check-privilege",
+				Usage: "check package to need privilege on this envirionment",
+				Action: func(c *cli.Context) error {
+					return checkPrivilege(c.Args().First())
+				},
+			},
+
+			{
 				Name:  "update",
 				Usage: "download latest package definition files",
 				Action: func(_ *cli.Context) error {
@@ -172,6 +180,17 @@ func search(packageName string) error {
 	for _, pkgFile := range pkgFiles {
 		fmt.Println(pkgFile)
 		fmt.Println()
+	}
+	return nil
+}
+
+func checkPrivilege(packageName string) error {
+	env, err := findPackageEnvironment(packageName, machineEnvId())
+	checkIfError(err)
+	if env.Privilege {
+		fmt.Println("true")
+	} else {
+		fmt.Println("false")
 	}
 	return nil
 }

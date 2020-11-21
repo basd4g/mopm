@@ -64,4 +64,3 @@ environments:
 
 - dependencies chain
 - container for testing package definition
-- check-privilege
