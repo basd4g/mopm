@@ -63,4 +63,4 @@ environments:
 ## TODO
 
 - container for testing package definition
-- execWithSilent
+- container for testing mopm bin
