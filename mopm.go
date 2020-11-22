@@ -184,7 +184,7 @@ func search(c *cli.Context) {
 	pkgFiles, err := findAllPackageFile(packageName)
 	Exit1IfError(err)
 	for _, pkgFile := range pkgFiles {
-		fmt.Println(pkgFile, "\n")
+		fmt.Print(pkgFile, "\n\n")
 	}
 }
 
