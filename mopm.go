@@ -488,7 +488,11 @@ func message(s string) {
 
 func Exit1IfError(err error) {
 	if err != nil {
-		message(err.Error())
-		os.Exit(1)
+		Exit1(err.Error())
 	}
+}
+
+func Exit1(s string) {
+	message(s)
+	os.Exit(1)
 }

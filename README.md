@@ -62,6 +62,5 @@ environments:
 
 ## TODO
 
-- dependencies chain
 - container for testing package definition
-- `checkIfError` -> `Exit1IfError`, `checkIfError(errors.New` -> `Exit1()`
+- execWithSilent
