@@ -29,7 +29,7 @@ type Environment struct {
 }
 
 func (env Environment) Verify() bool {
-	return execBash(env.Verification) == nil
+	return execBash(env.Verification, true) == nil
 }
 
 func (env Environment) DependenciesNotInstalled() []string {
@@ -277,11 +277,11 @@ func installExec(privilege bool, script string) error {
 	// | unroot       | OK(*) | OK     |
 	// (*)  If mopm is runnning on sudo (Need unroot username to get with $SUDO_USER)
 	if privilege == machinePrivilege() {
-		return execBash(script)
+		return execBash(script, false)
 	}
 	isSudo := (machinePrivilege() && os.Getenv("SUDO_USER") != "")
 	if !privilege && isSudo {
-		return execBashUnsudo(script)
+		return execBashUnsudo(script, false)
 	}
 	return errors.New("Check privilege to install this package")
 }
@@ -456,20 +456,24 @@ func machinePrivilege() bool {
 	return os.Getuid() == 0
 }
 
-func execBash(script string) error {
+func execBash(script string, silently bool) error {
 	cmd := exec.Command("bash")
-	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n")
+	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n", silently)
 }
 
-func execBashUnsudo(script string) error {
+func execBashUnsudo(script string, silently bool) error {
 	cmd := exec.Command("sudo", "--user="+os.Getenv("SUDO_USER"), "bash")
-	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n")
+	return cmdRun(cmd, "#!/bin/bash -e\n"+script+"\n", silently)
 }
 
-func cmdRun(cmd *exec.Cmd, stdinString string) error {
+func cmdRun(cmd *exec.Cmd, stdinString string, silently bool) error {
+	cmd.Stdin = bytes.NewBufferString(stdinString)
+	if silently {
+		return cmd.Run()
+	}
+
 	mopmDir := mopmDir()
 
-	cmd.Stdin = bytes.NewBufferString(stdinString)
 	logFile, err := os.OpenFile(mopmDir+"/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	Exit1IfError(err)
 	fmt.Fprintf(logFile, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
@@ -479,6 +483,7 @@ func cmdRun(cmd *exec.Cmd, stdinString string) error {
 	Exit1IfError(err)
 	fmt.Fprintf(logFileError, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stderr = io.MultiWriter(os.Stderr, logFileError)
+
 	return cmd.Run()
 }
 
