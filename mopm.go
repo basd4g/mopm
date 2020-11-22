@@ -177,7 +177,6 @@ func gitPull(path string) {
 	if err != nil && err.Error() != "already up-to-date" {
 		checkIfError(err)
 	}
-	message("hello")
 }
 
 func search(c *cli.Context) {
