@@ -36,7 +36,7 @@ func (env Environment) DependenciesNotInstalled() []string {
 	var ret []string
 	for _, depName := range env.Dependencies {
 		depEnv, err := findPackageEnvironment(depName, machineEnvId())
-		checkIfError(err)
+		Exit1IfError(err)
 		if !depEnv.Verify() {
 			ret = append(ret, depName)
 		}
@@ -162,27 +162,27 @@ func gitClone(path string, url string) {
 		URL:      url,
 		Progress: os.Stderr,
 	})
-	checkIfError(err)
+	Exit1IfError(err)
 }
 
 func gitPull(path string) {
 	r, err := git.PlainOpen(path)
-	checkIfError(err)
+	Exit1IfError(err)
 	w, err := r.Worktree()
-	checkIfError(err)
+	Exit1IfError(err)
 	err = w.Pull(&git.PullOptions{
 		RemoteName: "origin",
 		Progress:   os.Stderr,
 	})
 	if err != nil && err.Error() != "already up-to-date" {
-		checkIfError(err)
+		Exit1IfError(err)
 	}
 }
 
 func search(c *cli.Context) {
 	packageName := c.Args().First()
 	pkgFiles, err := findAllPackageFile(packageName)
-	checkIfError(err)
+	Exit1IfError(err)
 	for _, pkgFile := range pkgFiles {
 		fmt.Println(pkgFile, "\n")
 	}
@@ -191,21 +191,21 @@ func search(c *cli.Context) {
 func checkPrivilege(c *cli.Context) {
 	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
-	checkIfError(err)
+	Exit1IfError(err)
 	fmt.Println(env.Privilege)
 }
 
 func lint(c *cli.Context) {
 	packagePath := c.Args().First()
 	_, err := readPackageFile(packagePath)
-	checkIfError(err)
+	Exit1IfError(err)
 	message("lint passed")
 }
 
 func verify(c *cli.Context) {
 	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
-	checkIfError(err)
+	Exit1IfError(err)
 	fmt.Println(env.Verify())
 }
 
@@ -237,11 +237,11 @@ func install(c *cli.Context) {
 	for len(installPkgStack) > 0 {
 		pkgName = PopInstallPkg()
 		if FindInstallPkg(pkgName) {
-			checkIfError(errors.New("dependencies is looped"))
+			Exit1("dependencies is looped")
 		}
 
 		env, err := findPackageEnvironment(pkgName, machineEnvId())
-		checkIfError(err)
+		Exit1IfError(err)
 
 		if env.Verify() {
 			continue
@@ -256,10 +256,10 @@ func install(c *cli.Context) {
 		}
 
 		err = installExec(env.Privilege, env.Script)
-		checkIfError(err)
+		Exit1IfError(err)
 
 		if !env.Verify() {
-			checkIfError(errors.New("Finished installing script but failed to verify"))
+			Exit1("Finished installing script but failed to verify")
 		}
 		message("Installed " + pkgName)
 	}
@@ -289,15 +289,15 @@ func installExec(privilege bool, script string) error {
 func homeDir() string {
 	if !machinePrivilege() {
 		usr, err := user.Current()
-		checkIfError(err)
+		Exit1IfError(err)
 		return usr.HomeDir
 	}
 	sudoUserName := os.Getenv("SUDO_USER")
 	if sudoUserName == "" {
-		checkIfError(errors.New("Please excute with sudo if you excute mopm by root"))
+		Exit1("Please excute with sudo if you excute mopm by root")
 	}
 	usr, err := user.Lookup(sudoUserName)
-	checkIfError(err)
+	Exit1IfError(err)
 	return usr.HomeDir
 }
 
@@ -306,7 +306,7 @@ func mopmDir() string {
 	if f, err := os.Stat(mopmDir); os.IsNotExist(err) || !f.IsDir() {
 		// directory '~/.mopm' is not exist
 		err = os.Mkdir(mopmDir, 0777)
-		checkIfError(err)
+		Exit1IfError(err)
 	}
 	return mopmDir
 }
@@ -318,10 +318,10 @@ func packageRepositories() []string {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		message("Create the file because it does not exist: " + path)
 		err = ioutil.WriteFile(path, []byte(defaultPackageRepoUrl), 0644)
-		checkIfError(err)
+		Exit1IfError(err)
 	}
 	buf, err := ioutil.ReadFile(path)
-	checkIfError(err)
+	Exit1IfError(err)
 
 	var repos []string
 	for _, repo := range strings.Split(string(buf), "\n") {
@@ -330,7 +330,7 @@ func packageRepositories() []string {
 		}
 	}
 	if len(repos) == 0 {
-		checkIfError(errors.New("package repository url is not found in the file: " + path))
+		Exit1("package repository url is not found in the file: " + path)
 	}
 	return repos
 }
@@ -471,12 +471,12 @@ func cmdRun(cmd *exec.Cmd, stdinString string) error {
 
 	cmd.Stdin = bytes.NewBufferString(stdinString)
 	logFile, err := os.OpenFile(mopmDir+"/stdout.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	checkIfError(err)
+	Exit1IfError(err)
 	fmt.Fprintf(logFile, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stdout = io.MultiWriter(os.Stdout, logFile)
 
 	logFileError, err := os.OpenFile(mopmDir+"/stderr.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	checkIfError(err)
+	Exit1IfError(err)
 	fmt.Fprintf(logFileError, "#MOPM:LOG:TIME----- %s -----\n", time.Now())
 	cmd.Stderr = io.MultiWriter(os.Stderr, logFileError)
 	return cmd.Run()
@@ -486,7 +486,7 @@ func message(s string) {
 	fmt.Fprintln(os.Stderr, s)
 }
 
-func checkIfError(err error) {
+func Exit1IfError(err error) {
 	if err != nil {
 		message(err.Error())
 		os.Exit(1)
