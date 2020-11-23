@@ -23,15 +23,15 @@ var pkg = Package{
 
 func TestMachinePlatform(t *testing.T) {
 	got := machinePlatform()
-	if got != "linux/ubuntu" && got != "darwin" {
-		t.Errorf("machinePlatform() = %s, want 'linux/ubuntu' or 'darwin'", got)
+	if got != "linux/alpine_linux" {
+		t.Errorf("machinePlatform() = %s, want 'alpine_linux'", got)
 	}
 }
 
 func TestMachineEnvId(t *testing.T) {
 	got := machineEnvId()
-	if got != "amd64@linux/ubuntu" && got != "amd64@darwin" {
-		t.Errorf("machineEnvId() = %s, want 'amd64@linux/ubuntu' or 'amd64@darwin'", got)
+	if got != "amd64@linux/alpine_linux" {
+		t.Errorf("machineEnvId() = %s, want 'amd64@linux/alpine_linux'", got)
 	}
 }
 
