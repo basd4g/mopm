@@ -170,8 +170,8 @@ func TestReadPackageFile(t *testing.T) {
 
 func TestHomeDir(t *testing.T) {
 	got := homeDir()
-	if got != "/home/basd4g" && got !=  "/Users/basd4g" {
-		t.Errorf("homeDir() = %s, want '/home/basd4g' or '/Users/basd4g", got)
+	if got != "/home/mopmuser" {
+		t.Errorf("homeDir() = %s, want '/home/mopmuser'", got)
 	}
 }
 
@@ -184,36 +184,39 @@ func TestPackageRepositories(t *testing.T) {
 
 func TestRepoUrl2repoPath(t *testing.T) {
 	got := repoUrl2repoPath("https://github.com/basd4g/mopm-defs.git")
-	if got != "/home/basd4g/.mopm/github.com/basd4g/mopm-defs" &&
-	   got != "/Users/basd4g/.mopm/github.com/basd4g/mopm-defs" {
-		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/basd4g/.mopm/github.com/basd4g/mopm-defs' or '/Users/basd4g/.mopm/github.com/basd4g/mopm-defs'", got)
+	if got != "/home/mopmuser/.mopm/repos/github.com/basd4g/mopm-defs" {
+		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/mopmuser/.mopm/repos/github.com/basd4g/mopm-defs'", got)
 	}
 }
 
 /*
+
+func (env Environment) Verify() bool {
+func (env Environment) DependenciesNotInstalled() []string {
 func (pkg Package) String() string {
 func (pkgFile PackageFile) String() string {
 func (env Environment) String() string {
 func main() {
-func update() error {
+func update(_ *cli.Context) {
 func gitClone(path string, url string) {
 func gitPull(path string) {
-func search(packageName string) error {
-func lint(packagePath string) error {
-func verify(packageName string) error {
-func verifyExec(env *Environment) error {
-func install(packageName string) error {
+func search(c *cli.Context) {
+func checkPrivilege(c *cli.Context) {
+func lint(c *cli.Context) {
+func verify(c *cli.Context) {
+func PushInstallPkg(ss []string) {
+func PopInstallPkg() string {
+func FindInstallPkg(str string) bool {
+func install(c *cli.Context) {
 func installExec(privilege bool, script string) error {
+func mopmDir() string {
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
-func readPackageFile(path string) (PackageFile, error) {
-func lintPackage(pkg *Package) error {
-func machinePlatform() string {
-func machineEnvId() string {
 func machinePrivilege() bool {
-:q
-func execBashFunc(script string) error {
-func execBashUnsudoFunc(script string) error {
+func execBash(script string, silently bool) error {
+func execBashUnsudo(script string, silently bool) error {
+func cmdRun(cmd *exec.Cmd, stdinString string, silently bool) error {
 func message(s string) {
-func checkIfError(err error) {
+func Exit1IfError(err error) {
+func Exit1(s string) {
 */

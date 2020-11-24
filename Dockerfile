@@ -1,21 +1,22 @@
 FROM golang:1.15-alpine
-WORKDIR /go-app
 
 ENV GO111MODULE=on
 
 RUN apk add --no-cache \
         alpine-sdk \
         bash \
+        sudo \
         git
-#RUN echo 'root:root' |chpasswd
-#RUN adduser -h /home/mopm mopm \
-#    && echo "mopm ALL=(ALL)" >> /etc/sudoers
-#    && echo 'mopm:mopm' | chpasswd
-#    && echo "mopm ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-#RUN git clone https://github.com/basd4g/mopm.git
 
-COPY . /go-app
+RUN adduser -D -h /home/mopmuser mopmuser \
+    && echo "mopmuser:mopmuser" | chpasswd \
+    && echo "mopmuser ALL=(ALL)" >> /etc/sudoers
+
+USER mopmuser
+WORKDIR /home/mopmuser
+COPY ./go.mod /home/mopmuser/go.mod
 RUN go mod download
+COPY . /home/mopmuser
 RUN go build
 
 CMD go test
