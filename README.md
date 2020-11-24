@@ -6,6 +6,28 @@ Mopm excute package installation commands based on mopm package definition file.
 Mopm also records installation date.
 It helps you to write dotfiles.
 
+## Install
+
+```sh
+sudo curl -sL https://github.com/basd4g/mopm/releases/download/0.0.1/mopm-amd64-linux.out > /usr/bin/mopm && sudo chmod a+x /usr/bin/mopm
+```
+
+## Usage
+
+```sh
+# download latest package definitions
+mopm update
+
+# search a package
+mopm search PACKAGENAME
+
+# verify to install a package or not
+mopm verify PACKAGENAME
+
+# install a package
+mopm install PACKAGENAME
+```
+
 ## File description
 
 | path | description |
