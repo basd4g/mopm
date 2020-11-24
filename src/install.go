@@ -8,10 +8,10 @@ import (
 
 func install(pkgName string) {
 	installedAny := false
-	PushInstallPkg([]string{pkgName})
+	pushInstallPkg([]string{pkgName})
 	for len(installPkgStack) > 0 {
-		pkgName = PopInstallPkg()
-		if FindInstallPkg(pkgName) {
+		pkgName = popInstallPkg()
+		if findInstallPkg(pkgName) {
 			Exit1("dependencies is looped")
 		}
 
@@ -25,8 +25,8 @@ func install(pkgName string) {
 
 		deps := env.DependenciesNotInstalled()
 		if len(deps) != 0 {
-			PushInstallPkg([]string{pkgName})
-			PushInstallPkg(deps)
+			pushInstallPkg([]string{pkgName})
+			pushInstallPkg(deps)
 			continue
 		}
 
@@ -47,17 +47,17 @@ func install(pkgName string) {
 
 var installPkgStack []string
 
-func PushInstallPkg(ss []string) {
+func pushInstallPkg(ss []string) {
 	installPkgStack = append(installPkgStack, ss...)
 }
 
-func PopInstallPkg() string {
+func popInstallPkg() string {
 	ret := installPkgStack[len(installPkgStack)-1]
 	installPkgStack = installPkgStack[:len(installPkgStack)-1]
 	return ret
 }
 
-func FindInstallPkg(str string) bool {
+func findInstallPkg(str string) bool {
 	for _, s := range installPkgStack {
 		if s == str {
 			return true
