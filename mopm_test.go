@@ -119,7 +119,7 @@ func TestLintPackage(t *testing.T) {
 
 func TestReadPackageFile(t *testing.T) {
 	dir, _ := os.Getwd()
-	got, err := readPackageFile(dir + "/sample.mopm.yaml")
+	got, err := readPackageFile(dir + "/definitions/sample.yaml")
 	if err != nil {
 		t.Errorf("readPackageFile() return error: %s, want nil", err)
 	}
