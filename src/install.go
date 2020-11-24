@@ -45,18 +45,6 @@ func install(pkgName string) {
 	message("Installed successfully.")
 }
 
-func (env Environment) DependenciesNotInstalled() []string {
-	var ret []string
-	for _, depName := range env.Dependencies {
-		depEnv, err := findPackageEnvironment(depName, machineEnvId())
-		Exit1IfError(err)
-		if !depEnv.Verify() {
-			ret = append(ret, depName)
-		}
-	}
-	return ret
-}
-
 var installPkgStack []string
 
 func PushInstallPkg(ss []string) {

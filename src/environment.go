@@ -30,6 +30,18 @@ func (env Environment) Verify() bool {
 	return execBash(env.Verification, true) == nil
 }
 
+func (env Environment) DependenciesNotInstalled() []string {
+	var ret []string
+	for _, depName := range env.Dependencies {
+		depEnv, err := findPackageEnvironment(depName, machineEnvId())
+		Exit1IfError(err)
+		if !depEnv.Verify() {
+			ret = append(ret, depName)
+		}
+	}
+	return ret
+}
+
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
 	pkgFiles, err := findAllPackageFile(packageName)
 	if err != nil {
