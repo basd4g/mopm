@@ -3,16 +3,8 @@ package main
 
 import (
 	"errors"
-	"github.com/urfave/cli"
 	"regexp"
 )
-
-func lint(c *cli.Context) {
-	packagePath := c.Args().First()
-	_, err := readPackageFile(packagePath)
-	Exit1IfError(err)
-	message("lint passed")
-}
 
 func lintPackage(pkg *Package) error {
 	pkgNameRegex := regexp.MustCompile(`^[0-9a-z\-]+$`)

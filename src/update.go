@@ -2,12 +2,11 @@
 package main
 
 import (
-	"github.com/urfave/cli"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 )
 
-func update(_ *cli.Context) {
+func update() {
 	for _, url := range packageRepositories() {
 		message(url)
 		path := repoUrl2repoPath(url)

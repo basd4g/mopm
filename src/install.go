@@ -3,13 +3,11 @@ package main
 
 import (
 	"errors"
-	"github.com/urfave/cli"
 	"os"
 )
 
-func install(c *cli.Context) {
+func install(pkgName string) {
 	installedAny := false
-	pkgName := c.Args().First()
 	PushInstallPkg([]string{pkgName})
 	for len(installPkgStack) > 0 {
 		pkgName = PopInstallPkg()

@@ -25,9 +25,11 @@ func main() {
 			},
 
 			{
-				Name:   "update",
-				Usage:  "download latest package definition files",
-				Action: update,
+				Name:  "update",
+				Usage: "download latest package definition files",
+				Action: func(_ *cli.Context) {
+					update()
+				},
 			},
 			{
 				Name:   "lint",
@@ -49,9 +51,11 @@ func main() {
 				Action:  verify,
 			},
 			{
-				Name:   "install",
-				Usage:  "install the package",
-				Action: install,
+				Name:  "install",
+				Usage: "install the package",
+				Action: func(c *cli.Context) {
+					install(c.Args().First())
+				},
 			},
 		},
 	}
@@ -77,11 +81,19 @@ func checkPrivilege(c *cli.Context) {
 	Exit1IfError(err)
 	fmt.Println(env.Privilege)
 }
+
 func verify(c *cli.Context) {
 	packageName := c.Args().First()
 	env, err := findPackageEnvironment(packageName, machineEnvId())
 	Exit1IfError(err)
 	fmt.Println(env.Verify())
+}
+
+func lint(c *cli.Context) {
+	packagePath := c.Args().First()
+	_, err := readPackageFile(packagePath)
+	Exit1IfError(err)
+	message("lint passed")
 }
 
 func message(s string) {
