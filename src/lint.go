@@ -21,12 +21,13 @@ func lintPackage(pkg *Package) error {
 	if len(pkg.Environments) == 0 {
 		return errors.New("Package must not be empty")
 	}
+	platformRegex := regexp.MustCompile(`^(darwin|(linux(/[a-z\-_]+)?))$`)
 	for _, env := range pkg.Environments {
 		if env.Architecture != "amd64" {
 			return errors.New("Package architecture must be 'amd64'")
 		}
-		if env.Platform != "darwin" && env.Platform != "linux/ubuntu" {
-			return errors.New("Package architecture must be 'darwin' or 'linux/ubuntu'")
+		if !platformRegex.MatchString(env.Platform) {
+			return errors.New("Package architecture must be 'darwin', 'linux' or 'linux/DISTNAME'")
 		}
 		for _, dpkg := range env.Dependencies {
 			if !pkgNameRegex.MatchString(dpkg) {
