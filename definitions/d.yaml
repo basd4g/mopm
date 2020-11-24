@@ -1,0 +1,12 @@
+name: d
+url: https://github.com/basd4g/mopm
+description: install dependencies test
+environments:
+  - architecture: amd64
+    platform: linux/alpine_linux
+    dependencies:
+    verification: "find /tmp/mopm-defs-test/d-is-installed"
+    privilege: false
+    script: |
+      mkdir -p /tmp/mopm-defs-test
+      touch /tmp/mopm-defs-test/d-is-installed

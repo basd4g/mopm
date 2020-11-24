@@ -1,0 +1,17 @@
+name: a
+url: https://github.com/basd4g/mopm
+description: install dependencies test
+environments:
+  - architecture: amd64
+    platform: linux/alpine_linux
+    dependencies:
+      - b
+      - c
+      - d
+    verification: "find /tmp/mopm-defs-test/a-is-installed"
+    privilege: false
+    script: |
+      mkdir -p /tmp/mopm-defs-test
+      touch /tmp/mopm-defs-test/a-is-installed
+      echo "install pkg a is finished (stdout message test)"
+      echo "install pkg a is finished (stderr message test)" 1>&2
