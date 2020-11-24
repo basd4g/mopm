@@ -10,7 +10,7 @@ RUN apk add --no-cache \
 
 RUN adduser -D -h /home/mopmuser mopmuser \
     && echo "mopmuser:mopmuser" | chpasswd \
-    && echo "mopmuser ALL=(ALL)" >> /etc/sudoers
+    && echo "mopmuser ALL=(ALL) ALL" >> /etc/sudoers
 
 USER mopmuser
 WORKDIR /home/mopmuser
