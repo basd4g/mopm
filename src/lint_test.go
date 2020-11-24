@@ -13,7 +13,7 @@ func TestLintPackage(t *testing.T) {
 		Environments: []Environment{
 			{
 				Architecture: "amd64",
-				Platform:     "linux/ubuntu",
+				Platform:     "linux#ubuntu",
 				Dependencies: []string{},
 				Verification: "verificationCommand",
 				Privilege:    false,
@@ -67,7 +67,7 @@ func TestLintPackage(t *testing.T) {
 	// fail: platform
 	pkg.Environments[0].Platform = "unknown"
 	got = lintPackage(&pkg)
-	expected = "Package architecture must be 'darwin', 'linux' or 'linux/DISTNAME'"
+	expected = "Package architecture must be 'darwin', 'linux' or 'linux#DISTNAME'"
 	if got != nil && got.Error() != expected {
 		t.Errorf("lintPackage(&pkg) = '%s', want '%s'", got, expected)
 	}

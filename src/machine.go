@@ -20,7 +20,7 @@ func machinePlatform() string {
 	for _, line := range regexp.MustCompile(`\r\n|\n\r|\n|\r`).Split(string(buf), -1) {
 		if strings.HasPrefix(line, "NAME=\"") && strings.HasSuffix(line, "\"") {
 			distributionName := strings.Replace(strings.TrimSpace(strings.ToLower(line[6:len(line)-1])), " ", "_", -1)
-			return "linux/" + distributionName
+			return "linux#" + distributionName
 		}
 	}
 	return "linux"

@@ -3,7 +3,7 @@ url: https://github.com/basd4g/mopm
 description: need root installer
 environments:
   - architecture: amd64
-    platform: linux/alpine_linux
+    platform: linux#alpine_linux
     dependencies:
     verification: "find /tmp/mopm-defs-test/need-root-is-installed"
     privilege: true

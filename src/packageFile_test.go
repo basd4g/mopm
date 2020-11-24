@@ -42,8 +42,8 @@ func TestReadPackageFile(t *testing.T) {
 	if got.Package.Environments[1].Architecture != "amd64" {
 		t.Errorf("readPackageFile() return got.Package.Environments[1].Architecture = %s, wants 'amd64'", got.Package.Environments[1].Architecture)
 	}
-	if got.Package.Environments[1].Platform != "linux/ubuntu" {
-		t.Errorf("readPackageFile() return got.Package.Environments[1].Platform = %s, wants 'linux/ubuntu'", got.Package.Environments[1].Platform)
+	if got.Package.Environments[1].Platform != "linux#ubuntu" {
+		t.Errorf("readPackageFile() return got.Package.Environments[1].Platform = %s, wants 'linux#ubuntu'", got.Package.Environments[1].Platform)
 	}
 	if got.Package.Environments[1].Dependencies != nil {
 		t.Errorf("readPackageFile() return got.Package.Environments[1].Dependencies = %s, nil", got.Package.Environments[1].Dependencies)

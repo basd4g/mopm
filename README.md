@@ -9,7 +9,7 @@ It helps you to write dotfiles.
 ## Install
 
 ```sh
-sudo curl -sL https://github.com/basd4g/mopm/releases/download/0.0.1/mopm-amd64-linux.out > /usr/bin/mopm && sudo chmod a+x /usr/bin/mopm
+curl -sL https://git.io/Jk1GL | sudo sh
 ```
 
 ## Usage

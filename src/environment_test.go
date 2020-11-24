@@ -18,15 +18,15 @@ func TestFindPackageEnvironment(t *testing.T) {
 	_ = os.MkdirAll("/home/mopmuser/.mopm/repos/github.com/basd4g/mopm", 0755)
 	exec.Command("cp", "-r", "/home/mopmuser/definitions", "/home/mopmuser/.mopm/repos/github.com/basd4g/mopm").Run()
 
-	env, err := findPackageEnvironment("a", "amd64@linux/alpine_linux")
+	env, err := findPackageEnvironment("a", "amd64@linux#alpine_linux")
 	if err != nil {
 		t.Errorf("findPackageEnvironment() return err: %s", err)
 	}
 	if env.Architecture != "amd64" {
 		t.Errorf("findPackageEnvironment() returned env.Architecture: %s, want 'amd64'", env.Architecture)
 	}
-	if env.Platform != "linux/alpine_linux" {
-		t.Errorf("findPackageEnvironment() returned env.Platform: %s, want 'linux/alpine_linux'", env.Platform)
+	if env.Platform != "linux#alpine_linux" {
+		t.Errorf("findPackageEnvironment() returned env.Platform: %s, want 'linux#alpine_linux'", env.Platform)
 	}
 	if env.Dependencies[0] != "b" || env.Dependencies[1] != "c" || env.Dependencies[2] != "d" {
 		t.Errorf("findPackageEnvironment() returned env.Dependencies: %s, want {'b', 'c', 'd'}", env.Dependencies)

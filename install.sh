@@ -6,7 +6,7 @@ if [ "$(whoami)" != "root" ]; then
   exit 1
 fi
 
-curl -sL https://github.com/basd4g/mopm/releases/download/0.0.1/mopm-amd64-linux.out > /usr/bin/mopm
+curl -sL https://github.com/basd4g/mopm/releases/download/0.0.2/mopm-amd64-linux.out > /usr/bin/mopm
 chmod a+x /usr/bin/mopm
 
 echo "mopm is installed!"
