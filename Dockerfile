@@ -17,6 +17,6 @@ WORKDIR /home/mopmuser
 COPY ./go.mod /home/mopmuser/go.mod
 RUN go mod download
 COPY . /home/mopmuser
-RUN go build
+RUN make
 
-CMD go test
+CMD make test

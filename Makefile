@@ -1,8 +1,8 @@
 # vim:set noexpandtab :
 all:
-	go build mopm.go
+	cd src && go build -o ../mopm
 test:
-	go test
+	cd src && go test
 dbuild:
 	docker build -t mopm-test:latest .
 drun:
