@@ -1,25 +1,11 @@
+// vim:set noexpandtab :
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 )
-
-var pkg = Package{
-	Name:        "package-name",
-	Url:         "https://example.com",
-	Description: "This sentence is package description!",
-	Environments: []Environment{
-		{
-			Architecture: "amd64",
-			Platform:     "linux/ubuntu",
-			Dependencies: []string{},
-			Verification: "verificationCommand",
-			Privilege:    false,
-			Script:       "installComannds",
-		},
-	},
-}
 
 func TestMachinePlatform(t *testing.T) {
 	got := machinePlatform()
@@ -36,6 +22,22 @@ func TestMachineEnvId(t *testing.T) {
 }
 
 func TestLintPackage(t *testing.T) {
+	pkg := Package{
+		Name:        "package-name",
+		Url:         "https://example.com",
+		Description: "This sentence is package description!",
+		Environments: []Environment{
+			{
+				Architecture: "amd64",
+				Platform:     "linux/ubuntu",
+				Dependencies: []string{},
+				Verification: "verificationCommand",
+				Privilege:    false,
+				Script:       "installComannds",
+			},
+		},
+	}
+
 	// success
 	got := lintPackage(&pkg)
 	if got != nil {
@@ -175,17 +177,39 @@ func TestHomeDir(t *testing.T) {
 	}
 }
 
+func TestMopmDir(t *testing.T) {
+	got := mopmDir()
+	if got != "/home/mopmuser/.mopm" {
+		t.Errorf("homeDir() = %s, want '/home/mopmuser/.mopm'", got)
+	}
+}
+
 func TestPackageRepositories(t *testing.T) {
+	_ = os.Remove("/home/mopmuser/.mopm/repos-url")
 	got := packageRepositories()
 	if len(got) != 1 || got[0] != "https://github.com/basd4g/mopm-defs.git" {
-		t.Errorf("packageRepositories() = %s, want 'https://github.com/basd4g/mopm-defs.git'", got)
+		t.Errorf("packageRepositories() = '%s', want 'https://github.com/basd4g/mopm-defs.git', if repos-url is not exist", got)
 	}
+	_ = ioutil.WriteFile("/home/mopmuser/.mopm/repos-url", []byte("#comment line\nhttps://example.com/hello.git\n#comment line\nhttp://www.example/hoge.git"), 0644)
+	got = packageRepositories()
+	if len(got) != 2 || got[0] != "https://example.com/hello.git" || got[1] != "http://www.example/hoge.git" {
+		t.Errorf("packageRepositories() = {'%s', '%s'}, want {'https://example.com/hello.git', 'http://www.example/hoge.git'}", got[0], got[1])
+	}
+	_ = os.Remove("/home/mopmuser/.mopm/repos-url")
+
 }
 
 func TestRepoUrl2repoPath(t *testing.T) {
 	got := repoUrl2repoPath("https://github.com/basd4g/mopm-defs.git")
 	if got != "/home/mopmuser/.mopm/repos/github.com/basd4g/mopm-defs" {
 		t.Errorf("repoUrl2repoPath(\"https://github.com/basd4g/mopm-defs.git\") = %s, want '/home/mopmuser/.mopm/repos/github.com/basd4g/mopm-defs'", got)
+	}
+}
+
+func TestMachinePrivilege(t *testing.T) {
+	got := machinePrivilege()
+	if got {
+		t.Errorf("machinePrivilege() = true, want false")
 	}
 }
 
@@ -209,10 +233,8 @@ func PopInstallPkg() string {
 func FindInstallPkg(str string) bool {
 func install(c *cli.Context) {
 func installExec(privilege bool, script string) error {
-func mopmDir() string {
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
 func findPackageEnvironment(packageName string, envId string) (*Environment, error) {
-func machinePrivilege() bool {
 func execBash(script string, silently bool) error {
 func execBashUnsudo(script string, silently bool) error {
 func cmdRun(cmd *exec.Cmd, stdinString string, silently bool) error {
