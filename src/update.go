@@ -7,15 +7,14 @@ import (
 )
 
 func update() {
-	for _, url := range packageRepositories() {
-		message(url)
-		path := repoUrl2repoPath(url)
-		_, err := os.Stat(path)
+	for _, repo := range repositories() {
+		message(repo.url)
+		_, err := os.Stat(repo.dir)
 		if err != nil {
-			message("Directory does not exist: " + path + "\nClone")
-			gitClone(path, url)
+			message("Directory does not exist: " + repo.dir + "\nClone")
+			gitClone(repo.dir, repo.url)
 		} else {
-			gitPull(path)
+			gitPull(repo.dir)
 		}
 	}
 }

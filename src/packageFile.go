@@ -43,8 +43,8 @@ func (pkgFile PackageFile) String() string {
 
 func findAllPackageFile(packageName string) ([]PackageFile, error) {
 	var pkgFiles []PackageFile
-	for _, url := range packageRepositories() {
-		path := repoUrl2repoPath(url) + "/definitions/" + packageName + ".yaml"
+	for _, repo := range repositories() {
+		path := repo.dir + "/definitions/" + packageName + ".yaml"
 		pkgFile, err := readPackageFile(path)
 		if err == nil {
 			pkgFiles = append(pkgFiles, pkgFile)

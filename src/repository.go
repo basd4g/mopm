@@ -7,7 +7,12 @@ import (
 	"strings"
 )
 
-func packageRepositories() []string {
+type Repository struct {
+	url string
+	dir string
+}
+
+func repositories() []Repository {
 	defaultPackageRepoUrl := "https://github.com/basd4g/mopm-defs.git"
 
 	path := mopmDir() + "/repos-url"
@@ -19,10 +24,14 @@ func packageRepositories() []string {
 	buf, err := ioutil.ReadFile(path)
 	Exit1IfError(err)
 
-	var repos []string
-	for _, repo := range strings.Split(string(buf), "\n") {
-		if repo != "" && !strings.HasPrefix(repo, "#") {
-			repos = append(repos, strings.Trim(repo, " "))
+	var repos []Repository
+	for _, line := range strings.Split(string(buf), "\n") {
+		if line != "" && !strings.HasPrefix(line, "#") {
+			url :=  strings.Trim(line, " ")
+			repos = append(repos, Repository{
+				url: url,
+				dir: repoDir(url),
+			})
 		}
 	}
 	if len(repos) == 0 {
@@ -31,7 +40,7 @@ func packageRepositories() []string {
 	return repos
 }
 
-func repoUrl2repoPath(url string) string {
+func repoDir(url string) string {
 	repo := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(url, "http://"), "https://"), ".git")
 	return mopmDir() + "/repos/" + repo
 }
