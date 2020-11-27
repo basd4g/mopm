@@ -9,7 +9,7 @@ It helps you to write dotfiles.
 ## Install
 
 ```sh
-curl -sL https://git.io/Jk1GL | sudo sh
+sudo sh -c $(curl -sL https://git.io/Jk1GL)
 ```
 
 ## Usage
