@@ -71,7 +71,7 @@ func TestLintPackage(t *testing.T) {
 	if got != nil && got.Error() != expected {
 		t.Errorf("lintPackage(&pkg) = '%s', want '%s'", got, expected)
 	}
-	pkg.Environments[0].Platform = "linux/ubuntu"
+	pkg.Environments[0].Platform = "linux#ubuntu"
 
 	// fail: dependencies
 	pkg.Environments[0].Dependencies = []string{"valid-package-name", "unvalid package name"}
