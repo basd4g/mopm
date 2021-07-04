@@ -23,8 +23,8 @@ func lintPackage(pkg *Package) error {
 	}
 	platformRegex := regexp.MustCompile(`^(darwin|(linux(#[a-z\-_]+)?))$`)
 	for _, env := range pkg.Environments {
-		if env.Architecture != "amd64" {
-			return errors.New("Package architecture must be 'amd64'")
+		if env.Architecture != "amd64" && env.Architecture != "arm64" {
+			return errors.New("Package architecture must be 'amd64' or 'arm64'")
 		}
 		if !platformRegex.MatchString(env.Platform) {
 			return errors.New("Package architecture must be 'darwin', 'linux' or 'linux#DISTNAME'")
